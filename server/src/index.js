@@ -6,6 +6,7 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 
 const connectDB = require("./config/db");
+const autoSeed = require("./config/autoSeed");
 const errorHandler = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/auth.routes");
@@ -76,7 +77,8 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // ─── Start ─────────────────────────────────────────────
-connectDB().then(() => {
+connectDB().then(async () => {
+  await autoSeed();
   app.listen(PORT, () => {
     console.log(`\n🚀 Server running on http://localhost:${PORT}`);
     console.log(`📦 Environment: ${process.env.NODE_ENV}`);
