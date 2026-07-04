@@ -181,6 +181,61 @@ export const projects = [
     ],
   },
   {
+    id: "kidzoo",
+    slug: "kidzoo",
+    title: "KidZoo Learn",
+    subtitle: "Interactive Preschool Learning Platform",
+    description:
+      "A gamified preschool learning platform for LKG & UKG kids (ages 3.5–5.5) featuring quizzes, flashcards, story readers, matching games, memory games, and a parent progress dashboard.",
+    longDescription:
+      "KidZoo Learn is a full-featured educational web app built for young learners. It combines nine activity types — quizzes, flashcards, illustrated story readers, matching games, memory card games, and spelling exercises — with a gamification layer of XP points, collectible coins, daily streaks, and 16 unlockable achievements. Parents get a dedicated dashboard to track their child's progress, while teachers can manage up to 100 students through a Staff Studio with custom lesson creation and class-wide analytics.",
+    github: null,
+    live: "https://kidzoo-learn.vercel.app/",
+    status: "live" as const,
+    featured: true,
+    category: "Full Stack",
+    year: 2025,
+    problem:
+      "Preschool children needed engaging, age-appropriate digital learning that kept them motivated beyond a single session — traditional apps lacked gamification depth and parent visibility.",
+    solution:
+      "Built an interactive learning platform with nine activity types, a full gamification engine (XP, coins, streaks, achievements), and separate parent and teacher dashboards — making learning feel like play while giving adults full visibility.",
+    architecture:
+      "React-based SPA deployed on Vercel. Interactive activity components handle state locally with progress persisted to a backend. Parent and teacher dashboards consume a REST API. Animated UI components drive engagement without sacrificing performance.",
+    challenges: [
+      "Designing activity engines (memory, matching, spelling) that are engaging yet simple for 3–5 year olds",
+      "Building a gamification system with streaks and achievements that motivates daily usage",
+      "Creating separate parent and teacher dashboards with role-based access",
+    ],
+    metrics: {
+      activityTypes: "9",
+      achievements: "16",
+      deployed: "Live on Vercel",
+    },
+    techStack: [
+      "React.js",
+      "JavaScript",
+      "CSS3",
+      "Node.js",
+      "Express.js",
+      "MongoDB",
+      "Vercel",
+    ],
+    features: [
+      "Quiz with Multiple Choice Questions",
+      "Animated Flashcard Decks",
+      "Illustrated Story Reader",
+      "Matching & Memory Card Games",
+      "Spelling / Unscramble Exercises",
+      "XP Points & Coin Rewards",
+      "Daily Streak Tracking",
+      "16 Unlockable Achievements",
+      "Daily Challenges",
+      "Parent Progress Dashboard",
+      "Teacher Staff Studio (up to 100 students)",
+      "Custom Lesson Creation",
+    ],
+  },
+  {
     id: "cinevault",
     slug: "cinevault",
     title: "CineVault",
