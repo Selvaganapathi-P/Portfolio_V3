@@ -3,14 +3,54 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Github, ExternalLink, ArrowRight, Layers } from "lucide-react";
+import { Github, ExternalLink, ArrowRight } from "lucide-react";
 import { projects } from "@/data/resume";
 import { ProjectCardSkeleton } from "@/components/ui/skeleton";
 
-const statusColors = {
-  live: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-  completed: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  wip: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+/* Each project gets its own identity — not the same card cloned 4×. */
+const PROJECT_ACCENTS: Record<string, {
+  accent: string;
+  bg: string;
+  border: string;
+  number: string;
+}> = {
+  "ecommerce-website": {
+    accent: "hsl(252 87% 63%)",
+    bg: "hsl(252 87% 63% / 0.06)",
+    border: "hsl(252 87% 63% / 0.35)",
+    number: "hsl(252 87% 63% / 0.04)",
+  },
+  "studiopro": {
+    accent: "hsl(199 89% 52%)",
+    bg: "hsl(199 89% 52% / 0.06)",
+    border: "hsl(199 89% 52% / 0.35)",
+    number: "hsl(199 89% 52% / 0.04)",
+  },
+  "kidzoo": {
+    accent: "hsl(142 71% 45%)",
+    bg: "hsl(142 71% 45% / 0.06)",
+    border: "hsl(142 71% 45% / 0.35)",
+    number: "hsl(142 71% 45% / 0.04)",
+  },
+  "cinevault": {
+    accent: "hsl(24 95% 55%)",
+    bg: "hsl(24 95% 55% / 0.06)",
+    border: "hsl(24 95% 55% / 0.35)",
+    number: "hsl(24 95% 55% / 0.04)",
+  },
+};
+
+const DEFAULT_ACCENT = {
+  accent: "hsl(252 87% 63%)",
+  bg: "hsl(252 87% 63% / 0.06)",
+  border: "hsl(252 87% 63% / 0.35)",
+  number: "hsl(252 87% 63% / 0.04)",
+};
+
+const statusConfig = {
+  live: { label: "● Live", classes: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
+  completed: { label: "Completed", classes: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
+  wip: { label: "In Progress", classes: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
 };
 
 export function FeaturedProjects() {
@@ -22,6 +62,8 @@ export function FeaturedProjects() {
   return (
     <section className="section">
       <div className="container">
+
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -32,7 +74,9 @@ export function FeaturedProjects() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-6 h-px bg-primary" />
-              <span className="text-xs text-primary font-mono uppercase tracking-widest">Featured Work</span>
+              <span className="text-xs text-primary font-mono uppercase tracking-widest">
+                Featured Work
+              </span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
               Projects I&apos;ve
@@ -48,94 +92,158 @@ export function FeaturedProjects() {
           </Link>
         </motion.div>
 
+        {/* Cards */}
         {!mounted ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {[0, 1, 2].map((i) => <ProjectCardSkeleton key={i} />)}
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {featured.map((project, i) => (
-              <motion.article
-                key={project.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.6, delay: i * 0.12 }}
-                className={`group relative flex flex-col rounded-2xl glass border border-border/40 overflow-hidden hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 ${
-                  i === 0 ? "lg:col-span-2 lg:row-span-1" : ""
-                }`}
-              >
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {featured.map((project, i) => {
+              const colors = PROJECT_ACCENTS[project.slug] ?? DEFAULT_ACCENT;
+              const status = statusConfig[project.status];
 
-                <div className="p-6 flex flex-col flex-1">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                      <Layers size={20} className="text-primary" />
-                    </div>
-                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${statusColors[project.status]}`}>
-                      {project.status === "live" ? "● Live" : project.status === "completed" ? "Completed" : "WIP"}
-                    </span>
+              return (
+                <motion.article
+                  key={project.id}
+                  initial={{ opacity: 0, y: 32 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  className={`group relative flex flex-col rounded-2xl border bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${
+                    i === 0 ? "lg:col-span-2" : ""
+                  }`}
+                  style={{
+                    borderColor: "hsl(var(--border) / 0.5)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = colors.border;
+                    (e.currentTarget as HTMLElement).style.boxShadow = `0 20px 60px -12px ${colors.bg}`;
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border) / 0.5)";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "";
+                  }}
+                >
+                  {/* Top accent line — project color */}
+                  <div
+                    className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)` }}
+                  />
+
+                  {/* Large index number — background design element */}
+                  <div
+                    className="absolute top-4 right-5 text-[88px] font-black leading-none select-none pointer-events-none transition-all duration-300 group-hover:opacity-100"
+                    style={{
+                      color: colors.number,
+                      opacity: 0.6,
+                      filter: `drop-shadow(0 0 24px ${colors.accent})`,
+                    }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
                   </div>
 
-                  <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">
-                    {project.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1.5 mb-6">
-                    {project.techStack.slice(0, 5).map((tech) => (
+                  <div className="relative p-6 flex flex-col flex-1">
+                    {/* Header row */}
+                    <div className="flex items-start justify-between mb-5">
+                      {/* Project color dot */}
+                      <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${colors.accent}18`, border: `1px solid ${colors.accent}35` }}
+                      >
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ background: colors.accent, boxShadow: `0 0 8px ${colors.accent}` }}
+                        />
+                      </div>
                       <span
-                        key={tech}
-                        className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50"
+                        className={`px-2.5 py-0.5 text-xs font-semibold rounded-full border ${status.classes}`}
                       >
-                        {tech}
+                        {status.label}
                       </span>
-                    ))}
-                    {project.techStack.length > 5 && (
-                      <span className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50">
-                        +{project.techStack.length - 5}
-                      </span>
-                    )}
-                  </div>
+                    </div>
 
-                  <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-                    <Link
-                      href={`/projects/${project.slug}`}
-                      className="flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
+                    {/* Category */}
+                    <div
+                      className="text-[10px] font-mono uppercase tracking-widest mb-2 font-semibold"
+                      style={{ color: colors.accent }}
                     >
-                      Case Study <ArrowRight size={14} />
-                    </Link>
-                    {project.github && (
-                      <a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                        aria-label="GitHub"
+                      {project.category}
+                    </div>
+
+                    {/* Title */}
+                    <h3
+                      className="text-lg font-bold text-foreground mb-2.5 transition-colors duration-200 group-hover:text-foreground"
+                      style={{ "--hover-color": colors.accent } as React.CSSProperties}
+                    >
+                      {project.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-5 flex-1">
+                      {project.description}
+                    </p>
+
+                    {/* Tech tags */}
+                    <div className="flex flex-wrap gap-1.5 mb-5">
+                      {project.techStack.slice(0, i === 0 ? 6 : 4).map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-2 py-0.5 text-[11px] rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                      {project.techStack.length > (i === 0 ? 6 : 4) && (
+                        <span className="px-2 py-0.5 text-[11px] rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono">
+                          +{project.techStack.length - (i === 0 ? 6 : 4)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex items-center gap-3 pt-4 border-t border-border/40">
+                      <Link
+                        href={`/projects/${project.slug}`}
+                        className="flex items-center gap-1.5 text-sm font-semibold transition-colors"
+                        style={{ color: colors.accent }}
                       >
-                        <Github size={15} />
-                      </a>
-                    )}
-                    {project.live && (
-                      <a
-                        href={project.live}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                        aria-label="Live Demo"
-                      >
-                        <ExternalLink size={15} />
-                      </a>
-                    )}
+                        Case Study
+                        <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                      </Link>
+                      <div className="flex items-center gap-1 ml-auto">
+                        {project.github && (
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="GitHub"
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                          >
+                            <Github size={14} />
+                          </a>
+                        )}
+                        {project.live && (
+                          <a
+                            href={project.live}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Live Demo"
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </motion.article>
-            ))}
+                </motion.article>
+              );
+            })}
           </div>
         )}
 
+        {/* Mobile "view all" */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

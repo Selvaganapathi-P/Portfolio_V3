@@ -3,17 +3,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
 import { useTheme } from "next-themes";
 import {
   Sun,
   Moon,
   Menu,
   X,
-  Command,
   Github,
   Linkedin,
-  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { personal } from "@/data/resume";
@@ -35,6 +33,9 @@ export function Navbar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
 
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -48,6 +49,15 @@ export function Navbar() {
 
   return (
     <>
+      {/* Scroll progress indicator */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[2px] z-[60] origin-left"
+        style={{
+          scaleX,
+          background: "linear-gradient(90deg, hsl(252 87% 63%), hsl(271 91% 65%), hsl(199 89% 48%))",
+        }}
+      />
+
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

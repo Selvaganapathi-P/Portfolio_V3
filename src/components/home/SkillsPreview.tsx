@@ -1,12 +1,51 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { skills, techStack } from "@/data/resume";
+import { techStack, personal } from "@/data/resume";
 
-const techIcons: Record<string, string> = {
+/* Skill categories with intentional grouping.
+   No percentage bars — they're subjective and patronizing. */
+const SKILL_CATEGORIES = [
+  {
+    label: "Language",
+    color: "hsl(252 87% 63%)",
+    bg: "hsl(252 87% 63% / 0.08)",
+    border: "hsl(252 87% 63% / 0.2)",
+    skills: ["JavaScript"],
+  },
+  {
+    label: "Frontend",
+    color: "hsl(199 89% 52%)",
+    bg: "hsl(199 89% 52% / 0.08)",
+    border: "hsl(199 89% 52% / 0.2)",
+    skills: ["React.js", "HTML5", "CSS3", "Recharts"],
+  },
+  {
+    label: "Backend",
+    color: "hsl(142 71% 45%)",
+    bg: "hsl(142 71% 45% / 0.08)",
+    border: "hsl(142 71% 45% / 0.2)",
+    skills: ["Node.js", "Express.js", "REST API Design", "JWT Auth"],
+  },
+  {
+    label: "Database",
+    color: "hsl(271 91% 65%)",
+    bg: "hsl(271 91% 65% / 0.08)",
+    border: "hsl(271 91% 65% / 0.2)",
+    skills: ["MongoDB", "Mongoose"],
+  },
+  {
+    label: "Tools & Infra",
+    color: "hsl(24 95% 55%)",
+    bg: "hsl(24 95% 55% / 0.08)",
+    border: "hsl(24 95% 55% / 0.2)",
+    skills: ["Git", "Vercel", "Netlify", "Firebase Auth", "Multer", "Postman"],
+  },
+];
+
+const TECH_ICONS: Record<string, string> = {
   "JavaScript": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg",
   "React.js": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
   "Node.js": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
@@ -18,44 +57,17 @@ const techIcons: Record<string, string> = {
   "Firebase": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
 };
 
-function SkillBar({ name, level, delay }: { name: string; level: number; delay: number }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-
-  return (
-    <div ref={ref} className="space-y-1.5">
-      <div className="flex justify-between text-sm">
-        <span className="text-foreground font-medium">{name}</span>
-        <span className="text-muted-foreground text-xs">{level}%</span>
-      </div>
-      <div className="skill-bar">
-        <motion.div
-          className="skill-bar-fill"
-          initial={{ width: 0 }}
-          animate={inView ? { width: `${level}%` } : { width: 0 }}
-          transition={{ duration: 1.2, delay, ease: [0.16, 1, 0.3, 1] }}
-        />
-      </div>
-    </div>
-  );
-}
-
 export function SkillsPreview() {
-  const allSkills = [
-    ...skills.languages,
-    ...skills.backend,
-    ...skills.frontend.slice(0, 2),
-    ...skills.database,
-  ];
-
   return (
     <section className="section">
       <div className="container">
+
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex items-end justify-between mb-12"
+          className="flex items-end justify-between mb-14"
         >
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -70,49 +82,91 @@ export function SkillsPreview() {
             href="/skills"
             className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
           >
-            Full stack <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            Full overview
+            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Skill bars */}
+
+          {/* ── Left: Skill categories ──────────────────── */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             className="space-y-5"
           >
-            {allSkills.map((skill, i) => (
-              <SkillBar
-                key={skill.name}
-                name={skill.name}
-                level={skill.level}
-                delay={i * 0.08}
-              />
+            {SKILL_CATEGORIES.map((cat, ci) => (
+              <motion.div
+                key={cat.label}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: ci * 0.08 }}
+              >
+                {/* Category label */}
+                <div className="flex items-center gap-2 mb-2.5">
+                  <div
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: cat.color, boxShadow: `0 0 6px ${cat.color}` }}
+                  />
+                  <span
+                    className="text-[10px] font-mono uppercase tracking-widest font-semibold"
+                    style={{ color: cat.color }}
+                  >
+                    {cat.label}
+                  </span>
+                </div>
+
+                {/* Skill chips */}
+                <div className="flex flex-wrap gap-2">
+                  {cat.skills.map((skill, si) => (
+                    <motion.span
+                      key={skill}
+                      initial={{ opacity: 0, scale: 0.88 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: ci * 0.06 + si * 0.04 }}
+                      whileHover={{ scale: 1.04, y: -1 }}
+                      className="px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-default border"
+                      style={{
+                        background: cat.bg,
+                        borderColor: cat.border,
+                        color: cat.color,
+                      }}
+                    >
+                      {skill}
+                    </motion.span>
+                  ))}
+                </div>
+              </motion.div>
             ))}
           </motion.div>
 
-          {/* Tech icons grid */}
+          {/* ── Right: Tech icon grid ───────────────────── */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="space-y-6"
           >
             <div className="grid grid-cols-4 gap-3">
               {techStack.slice(0, 12).map((tech, i) => (
                 <motion.div
                   key={tech.name}
-                  initial={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, scale: 0.78 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  whileHover={{ scale: 1.08, y: -2 }}
-                  className="glass border border-border/40 rounded-xl p-3 flex flex-col items-center gap-2 hover:border-primary/30 transition-colors cursor-default"
+                  transition={{ delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ scale: 1.08, y: -3 }}
+                  className="glass border border-border/40 rounded-xl p-3 flex flex-col items-center gap-2 hover:border-primary/30 transition-all cursor-default group"
                 >
-                  {techIcons[tech.name] ? (
+                  {TECH_ICONS[tech.name] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={techIcons[tech.name]} alt={tech.name} className="w-7 h-7" />
+                    <img
+                      src={TECH_ICONS[tech.name]}
+                      alt={tech.name}
+                      className="w-7 h-7 group-hover:scale-110 transition-transform"
+                    />
                   ) : (
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white"
@@ -121,12 +175,31 @@ export function SkillsPreview() {
                       {tech.name.slice(0, 2)}
                     </div>
                   )}
-                  <span className="text-xs text-muted-foreground text-center leading-tight">
+                  <span className="text-[10px] text-muted-foreground text-center leading-tight group-hover:text-foreground transition-colors">
                     {tech.name.replace(".js", "")}
                   </span>
                 </motion.div>
               ))}
             </div>
+
+            {/* Currently learning / focus */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="mt-5 p-4 rounded-xl glass border border-primary/20 flex items-start gap-3"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0 shadow-[0_0_6px_hsl(252_87%_63%)]" />
+              <div>
+                <p className="text-xs font-mono uppercase tracking-widest text-primary font-semibold mb-0.5">
+                  Current Focus
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {personal.currentFocus} — building production-ready applications.
+                </p>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

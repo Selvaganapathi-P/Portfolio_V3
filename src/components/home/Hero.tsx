@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useSpring,
+  useMotionTemplate,
+  AnimatePresence,
+} from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -9,205 +17,165 @@ import {
   Download,
   Github,
   Linkedin,
-  MapPin,
-  Sparkles,
-  Code2,
-  Terminal,
   ExternalLink,
 } from "lucide-react";
 import { personal, stats } from "@/data/resume";
 
-const typingStrings = [
+const ROLES = [
   "Full Stack Engineer",
   "MERN Stack Developer",
   "React Specialist",
   "API Architect",
-  "MongoDB Expert",
   "Node.js Developer",
 ];
 
-function TypingAnimation() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [displayed, setDisplayed] = useState("");
-  const [deleting, setDeleting] = useState(false);
+/* ─── Role Switcher ─────────────────────────────────────
+   Smooth vertical crossfade with blur — more refined
+   than character-by-character typing.
+──────────────────────────────────────────────────────── */
+function RoleSwitcher() {
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const current = typingStrings[currentIndex];
-    let timeout: NodeJS.Timeout;
-
-    if (!deleting && displayed.length < current.length) {
-      timeout = setTimeout(() => setDisplayed(current.slice(0, displayed.length + 1)), 80);
-    } else if (!deleting && displayed.length === current.length) {
-      timeout = setTimeout(() => setDeleting(true), 2000);
-    } else if (deleting && displayed.length > 0) {
-      timeout = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 40);
-    } else if (deleting && displayed.length === 0) {
-      setDeleting(false);
-      setCurrentIndex((i) => (i + 1) % typingStrings.length);
-    }
-
-    return () => clearTimeout(timeout);
-  }, [displayed, deleting, currentIndex]);
-
-  return (
-    <span className="gradient-text font-bold">
-      {displayed}
-      <span className="animate-pulse text-primary">|</span>
-    </span>
-  );
-}
-
-function FloatingCode() {
-  const snippets = [
-    { code: "const api = express()", delay: 0, x: -20, y: -10 },
-    { code: "db.find({ active: true })", delay: 1, x: 10, y: -5 },
-    { code: "useState<User>(null)", delay: 2, x: -15, y: 5 },
-    { code: "JWT.verify(token)", delay: 0.5, x: 15, y: 10 },
-  ];
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-      {snippets.map((s, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{
-            opacity: [0, 0.5, 0.5, 0],
-            y: [20, s.y, s.y - 10, -20],
-            x: [0, s.x, s.x + 5],
-          }}
-          transition={{
-            duration: 6,
-            delay: s.delay + 2,
-            repeat: Infinity,
-            repeatDelay: 4,
-          }}
-          className="absolute font-mono text-xs text-primary/40 bg-primary/5 px-2 py-1 rounded border border-primary/10"
-          style={{
-            left: `${15 + i * 20}%`,
-            top: `${30 + (i % 2) * 30}%`,
-          }}
-        >
-          {s.code}
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-// Stable particle data — generated once on mount, never during SSR
-type Particle = { w: number; h: number; left: string; top: string; color: string; duration: number; delay: number };
-
-function ParticleBackground() {
-  const [particles, setParticles] = useState<Particle[]>([]);
-
-  useEffect(() => {
-    setParticles(
-      Array.from({ length: 40 }, (_, i) => ({
-        w: Math.random() * 3 + 1,
-        h: Math.random() * 3 + 1,
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 100}%`,
-        color:
-          i % 3 === 0 ? "hsl(252 87% 63% / 0.4)"
-          : i % 3 === 1 ? "hsl(271 91% 65% / 0.4)"
-          : "hsl(199 89% 48% / 0.4)",
-        duration: Math.random() * 4 + 3,
-        delay: Math.random() * 5,
-      }))
-    );
+    const t = setInterval(() => setIndex((i) => (i + 1) % ROLES.length), 3400);
+    return () => clearInterval(t);
   }, []);
 
-  if (particles.length === 0) return null;
-
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{ width: p.w, height: p.h, left: p.left, top: p.top, background: p.color }}
-          animate={{ y: [0, -30, 0], opacity: [0, 0.8, 0] }}
-          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
-        />
-      ))}
+    <div className="relative h-8 sm:h-9 lg:h-11 overflow-hidden select-none" aria-live="polite">
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={index}
+          initial={{ y: 26, opacity: 0, filter: "blur(8px)" }}
+          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          exit={{ y: -26, opacity: 0, filter: "blur(8px)" }}
+          transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute inset-0 flex items-center justify-center gradient-text font-bold text-xl sm:text-2xl lg:text-3xl"
+        >
+          {ROLES[index]}
+        </motion.span>
+      </AnimatePresence>
     </div>
   );
 }
 
+/* ─── Hero ──────────────────────────────────────────────── */
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref });
-  const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+  /* Mouse-tracking values */
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 38, damping: 24 });
+  const springY = useSpring(mouseY, { stiffness: 38, damping: 24 });
+
+  /* Avatar 3-D tilt */
+  const rotateX = useTransform(springY, [-0.5, 0.5], [6, -6]);
+  const rotateY = useTransform(springX, [-0.5, 0.5], [-6, 6]);
+
+  /* Ambient spotlight that follows cursor */
+  const spotX = useTransform(springX, [-0.5, 0.5], [28, 72]);
+  const spotY = useTransform(springY, [-0.5, 0.5], [28, 72]);
+  const spotlight = useMotionTemplate`radial-gradient(650px circle at ${spotX}% ${spotY}%, hsl(252 87% 63% / 0.07), transparent 65%)`;
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
   return (
     <section
       ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Background */}
+      {/* ── Background ──────────────────────────────────── */}
       <div className="absolute inset-0">
-        {/* Gradient orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-primary/10 blur-[120px] animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-violet-500/10 blur-[100px] animate-pulse-slow" style={{ animationDelay: "2s" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[150px]" />
+        {/* Atmosphere orbs */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-primary/8 blur-[140px] animate-pulse-slow" />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-violet-500/8 blur-[120px] animate-pulse-slow"
+          style={{ animationDelay: "2s" }}
+        />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-cyan-500/4 blur-[180px]" />
 
-        {/* Grid */}
-        <div className="absolute inset-0 grid-pattern opacity-[0.03]" />
+        {/* Subtle grid */}
+        <div className="absolute inset-0 grid-pattern opacity-[0.022]" />
 
-        <ParticleBackground />
-        <FloatingCode />
+        {/* Mouse-driven spotlight */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: spotlight }}
+        />
       </div>
 
+      {/* ── Content ─────────────────────────────────────── */}
       <motion.div
-        style={{ y, opacity }}
+        style={{ y, opacity: heroOpacity }}
         className="relative z-10 w-full px-6 sm:px-10 lg:px-16"
       >
         <div className="w-full text-center">
 
-          {/* ── Avatar Photo ──────────────────────────── */}
+          {/* Avatar — 3-D tilt on mouse move */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.7 }}
+            initial={{ opacity: 0, scale: 0.72 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="relative inline-block mb-4"
+            transition={{ duration: 0.82, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+            className="relative inline-block mb-5"
+            style={{ perspective: "900px" }}
           >
-            <div className="absolute inset-0 rounded-full bg-primary/25 blur-2xl scale-150 pointer-events-none" />
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              className="absolute -inset-1 rounded-full"
-              style={{
-                background: "conic-gradient(from 0deg, hsl(252 87% 63%), hsl(271 91% 65%), hsl(199 89% 48%), hsl(252 87% 63%))",
-              }}
-            />
-            <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-background bg-secondary">
-              <Image
-                src="/avatar.jpg"
-                alt={personal.name}
-                width={144}
-                height={144}
-                className="w-full h-full object-cover object-top"
-                priority
+            <motion.div style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}>
+              {/* Glow behind avatar */}
+              <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl scale-[1.4] pointer-events-none" />
+
+              {/* Rotating border — subtler than before */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-1.5 rounded-full"
+                style={{
+                  background:
+                    "conic-gradient(from 0deg, transparent 0deg, hsl(252 87% 63% / 0.85) 90deg, hsl(271 91% 65% / 0.85) 180deg, hsl(199 89% 48% / 0.85) 270deg, transparent 360deg)",
+                }}
               />
-            </div>
-            <span className="absolute bottom-1.5 right-1.5 flex h-4 w-4 z-10">
+
+              {/* Photo */}
+              <div className="relative w-40 h-40 sm:w-44 sm:h-44 rounded-full overflow-hidden border-2 border-background bg-secondary">
+                <Image
+                  src="/avatar.jpg"
+                  alt={personal.name}
+                  width={176}
+                  height={176}
+                  className="w-full h-full object-cover object-top"
+                  priority
+                />
+              </div>
+            </motion.div>
+
+            {/* Online indicator */}
+            <span className="absolute bottom-2 right-2 flex h-4 w-4 z-10">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-background" />
             </span>
           </motion.div>
 
-          {/* Badge */}
+          {/* Availability badge */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-primary/20 text-sm text-muted-foreground mb-4"
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass border border-primary/20 text-sm text-muted-foreground mb-5"
           >
-            <Sparkles size={14} className="text-primary" />
-            <span>MERN Stack Developer</span>
-            <span className="w-px h-3 bg-border" />
             <span className="flex items-center gap-1.5 text-emerald-500 font-medium">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -215,79 +183,59 @@ export function Hero() {
               </span>
               {personal.availabilityNote}
             </span>
+            <span className="w-px h-3 bg-border" />
+            <span>Tamil Nadu, India</span>
           </motion.div>
 
           {/* Name */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[1.05] mb-3 flex items-baseline justify-center gap-4"
+            transition={{ duration: 0.82, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[1.04] mb-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4"
           >
-            <span className="inline-flex text-foreground">{personal.name.split(" ")[0]}</span>
-            <span className="inline-flex gradient-text">{personal.name.split(" ").slice(1).join(" ")}</span>
+            <span className="text-foreground">{personal.name.split(" ")[0]}</span>
+            <span className="gradient-text">{personal.name.split(" ").slice(1).join(" ")}</span>
           </motion.h1>
 
-          {/* Typing */}
+          {/* Role — smooth crossfade instead of typing */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-xl sm:text-2xl lg:text-3xl text-muted-foreground mb-3 h-9"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.34 }}
+            className="mb-5"
           >
-            <TypingAnimation />
+            <RoleSwitcher />
           </motion.div>
 
-          {/* Summary */}
+          {/* Tagline */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-5"
+            transition={{ duration: 0.6, delay: 0.44 }}
+            className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-7"
           >
             {personal.tagline}
           </motion.p>
 
-          {/* Meta info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.45 }}
-            className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground mb-5"
-          >
-            <span className="flex items-center gap-1.5">
-              <MapPin size={14} className="text-primary" />
-              {personal.location}
-            </span>
-            <span className="w-px h-4 bg-border" />
-            <span className="flex items-center gap-1.5">
-              <Code2 size={14} className="text-primary" />
-              {personal.currentFocus}
-            </span>
-            <span className="w-px h-4 bg-border" />
-            <span className="flex items-center gap-1.5">
-              <Terminal size={14} className="text-violet-500" />
-              B.Tech IT — CGPA 8.1
-            </span>
-          </motion.div>
-
           {/* CTAs */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.52 }}
             className="flex flex-wrap items-center justify-center gap-3 mb-5"
           >
             <Link
               href="/projects"
-              className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
+              className="group relative inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/45 hover:-translate-y-0.5 active:translate-y-0 overflow-hidden"
             >
+              <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
               View Projects
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform duration-200" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl glass border border-border/60 text-foreground font-medium text-sm hover:border-primary/30 hover:bg-primary/5 transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl glass border border-border/60 text-foreground font-semibold text-sm hover:border-primary/40 hover:bg-primary/5 transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
               Get in Touch
             </Link>
@@ -295,79 +243,81 @@ export function Hero() {
               href="/resume"
               className="inline-flex items-center gap-2 px-4 py-3 rounded-xl text-muted-foreground text-sm hover:text-foreground transition-colors"
             >
-              <Download size={16} />
+              <Download size={15} />
               Resume
             </a>
           </motion.div>
 
           {/* Socials */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.55 }}
-            className="flex items-center justify-center gap-3 mb-6"
+            transition={{ duration: 0.6, delay: 0.58 }}
+            className="flex items-center justify-center gap-3 mb-9"
           >
-            <a
-              href={personal.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg glass border border-border/40 text-sm text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
-            >
-              <Github size={16} />
-              GitHub
-              <ExternalLink size={12} className="opacity-50" />
-            </a>
-            <a
-              href={personal.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg glass border border-border/40 text-sm text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
-            >
-              <Linkedin size={16} />
-              LinkedIn
-              <ExternalLink size={12} className="opacity-50" />
-            </a>
+            {[
+              { href: personal.github, icon: Github, label: "GitHub" },
+              { href: personal.linkedin, icon: Linkedin, label: "LinkedIn" },
+            ].map(({ href, icon: Icon, label }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 px-4 py-2 rounded-lg glass border border-border/40 text-sm text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+              >
+                <Icon size={15} />
+                {label}
+                <ExternalLink
+                  size={11}
+                  className="opacity-0 group-hover:opacity-50 transition-opacity"
+                />
+              </a>
+            ))}
           </motion.div>
 
           {/* Stats */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.65 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto"
+            transition={{ duration: 0.6, delay: 0.64 }}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto"
           >
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.82 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.7 + i * 0.08 }}
-                className="glass border border-border/40 rounded-xl p-4 text-center"
+                transition={{ delay: 0.70 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                className="glass border border-border/40 rounded-2xl p-4 text-center hover:border-primary/25 transition-colors"
               >
-                <div className="text-2xl font-bold gradient-text">
+                <div className="text-2xl sm:text-3xl font-bold gradient-text tabular-nums">
                   {stat.value}
-                  <span className="text-sm">{stat.suffix}</span>
+                  <span className="text-base sm:text-lg">{stat.suffix}</span>
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
+                <div className="text-[11px] text-muted-foreground mt-1 leading-tight">
+                  {stat.label}
+                </div>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Scroll Indicator */}
+      {/* Scroll indicator — mouse/scroll metaphor instead of "SCROLL" text */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        transition={{ delay: 1.7 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
-        <span className="text-xs text-muted-foreground tracking-widest uppercase">Scroll</span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="w-px h-12 bg-gradient-to-b from-primary/60 to-transparent"
-        />
+        <div className="w-5 h-8 rounded-full border border-border/50 flex items-start justify-center p-1.5">
+          <motion.div
+            animate={{ y: [0, 11, 0] }}
+            transition={{ duration: 1.9, repeat: Infinity, ease: [0.42, 0, 0.58, 1] }}
+            className="w-1 h-1.5 rounded-full bg-primary/70"
+          />
+        </div>
       </motion.div>
     </section>
   );
