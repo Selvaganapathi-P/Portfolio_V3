@@ -51,7 +51,7 @@ export function ContactCTA() {
                 href="/contact"
                 className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-xl shadow-primary/30 hover:shadow-primary/55 transition-all hover:-translate-y-0.5 active:translate-y-0 overflow-hidden"
               >
-                <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-600 ease-in-out bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+                <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-in-out bg-gradient-to-r from-transparent via-white/12 to-transparent" />
                 Start a Conversation
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>

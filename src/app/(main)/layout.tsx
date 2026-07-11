@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ChatWidget } from "@/components/ai/ChatWidget";
+import { CustomCursor } from "@/components/ui/CustomCursor";
 
 export default function MainLayout({
   children,
@@ -9,6 +10,7 @@ export default function MainLayout({
 }) {
   return (
     <>
+      <CustomCursor />
       <Navbar />
       <main className="min-h-screen pt-16">{children}</main>
       <Footer />

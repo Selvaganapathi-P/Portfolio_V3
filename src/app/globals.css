@@ -179,6 +179,30 @@ body {
   @page { margin: 1cm; }
 }
 
+/* ─── Custom Cursor — hide native on pointer devices ─── */
+@media (hover: hover) and (pointer: fine) {
+  html, html * { cursor: none !important; }
+}
+
+/* ─── Grain / Film Noise Overlay ─────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  opacity: var(--noise-opacity, 0.03);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 300px 300px;
+}
+
+/* ─── Marquee — pause on hover ───────────────────────── */
+.marquee-pause:hover .animate-marquee,
+.marquee-pause:hover .animate-marquee-reverse {
+  animation-play-state: paused;
+}
+
 /* ─── Reduce Motion ──────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

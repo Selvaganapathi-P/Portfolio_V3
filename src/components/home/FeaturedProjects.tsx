@@ -18,25 +18,25 @@ const PROJECT_ACCENTS: Record<string, {
     accent: "hsl(252 87% 63%)",
     bg: "hsl(252 87% 63% / 0.06)",
     border: "hsl(252 87% 63% / 0.35)",
-    number: "hsl(252 87% 63% / 0.04)",
+    number: "hsl(252 87% 63% / 0.22)",
   },
   "studiopro": {
     accent: "hsl(199 89% 52%)",
     bg: "hsl(199 89% 52% / 0.06)",
     border: "hsl(199 89% 52% / 0.35)",
-    number: "hsl(199 89% 52% / 0.04)",
+    number: "hsl(199 89% 52% / 0.22)",
   },
   "kidzoo": {
     accent: "hsl(142 71% 45%)",
     bg: "hsl(142 71% 45% / 0.06)",
     border: "hsl(142 71% 45% / 0.35)",
-    number: "hsl(142 71% 45% / 0.04)",
+    number: "hsl(142 71% 45% / 0.22)",
   },
   "cinevault": {
     accent: "hsl(24 95% 55%)",
     bg: "hsl(24 95% 55% / 0.06)",
     border: "hsl(24 95% 55% / 0.35)",
-    number: "hsl(24 95% 55% / 0.04)",
+    number: "hsl(24 95% 55% / 0.22)",
   },
 };
 
@@ -44,7 +44,7 @@ const DEFAULT_ACCENT = {
   accent: "hsl(252 87% 63%)",
   bg: "hsl(252 87% 63% / 0.06)",
   border: "hsl(252 87% 63% / 0.35)",
-  number: "hsl(252 87% 63% / 0.04)",
+  number: "hsl(252 87% 63% / 0.22)",
 };
 
 const statusConfig = {
@@ -133,11 +133,10 @@ export function FeaturedProjects() {
 
                   {/* Large index number — background design element */}
                   <div
-                    className="absolute top-4 right-5 text-[88px] font-black leading-none select-none pointer-events-none transition-all duration-300 group-hover:opacity-100"
+                    className="absolute top-4 right-5 text-[88px] font-black leading-none select-none pointer-events-none transition-all duration-500 opacity-40 group-hover:opacity-100"
                     style={{
                       color: colors.number,
-                      opacity: 0.6,
-                      filter: `drop-shadow(0 0 24px ${colors.accent})`,
+                      filter: `drop-shadow(0 0 28px ${colors.accent})`,
                     }}
                   >
                     {String(i + 1).padStart(2, "0")}
@@ -172,10 +171,7 @@ export function FeaturedProjects() {
                     </div>
 
                     {/* Title */}
-                    <h3
-                      className="text-lg font-bold text-foreground mb-2.5 transition-colors duration-200 group-hover:text-foreground"
-                      style={{ "--hover-color": colors.accent } as React.CSSProperties}
-                    >
+                    <h3 className="text-lg font-bold text-foreground mb-2.5">
                       {project.title}
                     </h3>
 

@@ -59,6 +59,8 @@ const config: Config = {
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "float": "float 6s ease-in-out infinite",
         "shimmer": "shimmer 2s linear infinite",
+        "marquee": "marquee 28s linear infinite",
+        "marquee-reverse": "marquee-reverse 28s linear infinite",
       },
       keyframes: {
         "fade-in": {
@@ -76,6 +78,14 @@ const config: Config = {
         "shimmer": {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
+        },
+        "marquee": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        "marquee-reverse": {
+          "0%": { transform: "translateX(-50%)" },
+          "100%": { transform: "translateX(0)" },
         },
       },
       backgroundImage: {
