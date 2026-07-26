@@ -1,161 +1,242 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Github, ExternalLink, ArrowRight, Layers, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
-import useEmblaCarousel from "embla-carousel-react";
+import Image from "next/image";
+import { Github, ExternalLink, ArrowUpRight, Search, X } from "lucide-react";
 import { projects } from "@/data/resume";
 import { BrowserFrame } from "@/components/ui/BrowserFrame";
 
 const categories = ["All", "Full Stack", "Frontend"];
 
-const statusColors = {
-  live: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-  completed: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  wip: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-};
-
-const PROJECT_ACCENTS: Record<string, { accent: string; bg: string; border: string }> = {
-  "educore-erp":       { accent: "hsl(168 74% 43%)", bg: "hsl(168 74% 43% / 0.06)", border: "hsl(168 74% 43% / 0.3)" },
-  "ecommerce-website": { accent: "hsl(252 87% 63%)", bg: "hsl(252 87% 63% / 0.06)", border: "hsl(252 87% 63% / 0.3)" },
-  studiopro:           { accent: "hsl(199 89% 52%)", bg: "hsl(199 89% 52% / 0.06)", border: "hsl(199 89% 52% / 0.3)" },
-  kidzoo:              { accent: "hsl(142 71% 45%)", bg: "hsl(142 71% 45% / 0.06)", border: "hsl(142 71% 45% / 0.3)" },
-  cinevault:           { accent: "hsl(24 95% 55%)",  bg: "hsl(24 95% 55% / 0.06)",  border: "hsl(24 95% 55% / 0.3)"  },
+const PROJECT_ACCENTS: Record<string, { accent: string; glow: string; border: string }> = {
+  "educore-erp":       { accent: "hsl(168 74% 43%)",  glow: "rgba(22,163,114,0.10)",  border: "rgba(22,163,114,0.3)"  },
+  "ecommerce-website": { accent: "hsl(252 87% 63%)",  glow: "rgba(139,92,246,0.10)",  border: "rgba(139,92,246,0.3)"  },
+  studiopro:           { accent: "hsl(199 89% 52%)",  glow: "rgba(14,165,233,0.10)",  border: "rgba(14,165,233,0.3)"  },
+  kidzoo:              { accent: "hsl(142 71% 45%)",  glow: "rgba(34,197,94,0.10)",   border: "rgba(34,197,94,0.3)"   },
+  cinevault:           { accent: "hsl(24 95% 55%)",   glow: "rgba(249,115,22,0.10)",  border: "rgba(249,115,22,0.3)"  },
 };
 
 const SCREENSHOTS: Record<string, string> = {
   "educore-erp":       "/previews/educore.png",
   "ecommerce-website": "/previews/ecommerce.png",
-  studiopro: "/previews/studiopro.png",
-  kidzoo:    "/previews/kidzoo.png",
-  cinevault: "/previews/cinevault.png",
+  studiopro:           "/previews/studiopro.png",
+  kidzoo:              "/previews/kidzoo.png",
+  cinevault:           "/previews/cinevault.png",
 };
 
-/* Sites that block cross-origin iframe embedding */
 const EMBED_BLOCKED = new Set(["kidzoo", "educore-erp"]);
 
-/* ─── Mobile Embla carousel ─────────────────────────── */
-function ProjectCarousel({ items }: { items: typeof projects }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(true);
+const STATUS = {
+  live:      { label: "Live",        cls: "text-emerald-500 bg-emerald-500/10 border-emerald-500/25" },
+  completed: { label: "Completed",   cls: "text-sky-500 bg-sky-500/10 border-sky-500/25"             },
+  wip:       { label: "In Progress", cls: "text-amber-500 bg-amber-500/10 border-amber-500/25"       },
+};
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setCanPrev(emblaApi.canScrollPrev());
-    setCanNext(emblaApi.canScrollNext());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    emblaApi.on("select", onSelect);
-    onSelect();
-  }, [emblaApi, onSelect]);
-
-  if (items.length === 0) return null;
-
-  return (
-    <div className="relative">
-      <div className="overflow-hidden rounded-2xl" ref={emblaRef}>
-        <div className="flex">
-          {items.map((project) => {
-            const colors = PROJECT_ACCENTS[project.slug] ?? PROJECT_ACCENTS["ecommerce-website"];
-            const screenshot = SCREENSHOTS[project.slug];
-            return (
-              <div key={project.id} className="flex-[0_0_90%] min-w-0 pl-4">
-                <MobileProjectCard
-                  project={project}
-                  colors={colors}
-                  screenshot={screenshot}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      {/* Nav buttons */}
-      <div className="flex items-center justify-center gap-3 mt-4">
-        <button
-          onClick={() => emblaApi?.scrollPrev()}
-          disabled={!canPrev}
-          className="p-2 rounded-full glass border border-border/40 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-        >
-          <ChevronLeft size={16} />
-        </button>
-        <button
-          onClick={() => emblaApi?.scrollNext()}
-          disabled={!canNext}
-          className="p-2 rounded-full glass border border-border/40 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-        >
-          <ChevronRight size={16} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Single card (shared by grid & carousel) ───────── */
-function MobileProjectCard({
+/* ─── Expandable project card ─────────────────────────── */
+function ProjectCard({
   project,
-  colors,
-  screenshot,
+  globalIndex,
+  isActive,
+  onToggle,
 }: {
   project: typeof projects[0];
-  colors: { accent: string; bg: string; border: string };
-  screenshot?: string;
+  globalIndex: number;
+  isActive: boolean;
+  onToggle: () => void;
 }) {
+  const colors     = PROJECT_ACCENTS[project.slug] ?? PROJECT_ACCENTS["ecommerce-website"];
+  const status     = STATUS[project.status];
+  const screenshot = SCREENSHOTS[project.slug];
+
   return (
-    <article className="glass border border-border/40 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300">
-      <div className="p-3 pb-0">
-        <BrowserFrame
-          screenshotSrc={screenshot}
-          liveUrl={project.live ?? undefined}
-          title={project.title}
-          accent={colors.accent}
-          height={180}
-          embedBlocked={EMBED_BLOCKED.has(project.slug)}
-        />
-      </div>
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h2 className="font-bold text-foreground text-base">{project.title}</h2>
-          <span className={`px-2 py-0.5 text-xs font-medium rounded-full border flex-shrink-0 ${statusColors[project.status]}`}>
-            {project.status === "live" ? "● Live" : project.status === "completed" ? "Done" : "WIP"}
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className="relative group"
+    >
+      {/* Hover/active glow */}
+      <div
+        className="absolute -inset-1 rounded-2xl pointer-events-none transition-opacity duration-500"
+        style={{ background: colors.glow, filter: "blur(24px)", opacity: isActive ? 1 : 0 }}
+      />
+
+      <div
+        className="relative rounded-2xl overflow-hidden transition-all duration-400 cursor-pointer"
+        style={{
+          border: `1px solid ${isActive ? colors.border : "hsl(var(--border) / 0.5)"}`,
+          background: "hsl(var(--card))",
+        }}
+        onClick={onToggle}
+      >
+        {/* ── Collapsed header row ─────────────── */}
+        <div className="flex items-center gap-4 px-5 py-4 sm:px-7 sm:py-5">
+          {/* Number */}
+          <span
+            className="text-2xl sm:text-3xl font-black tabular-nums leading-none flex-shrink-0 w-10 transition-colors duration-300"
+            style={{ color: isActive ? colors.accent : "hsl(var(--border))" }}
+          >
+            {String(globalIndex + 1).padStart(2, "0")}
           </span>
-        </div>
-        <p className="text-sm text-muted-foreground leading-relaxed mb-3">{project.description}</p>
-        <div className="flex flex-wrap gap-1 mb-3">
-          {project.techStack.slice(0, 4).map((t) => (
-            <span key={t} className="px-2 py-0.5 text-[10px] rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono">{t}</span>
-          ))}
-        </div>
-        <div className="flex items-center gap-3 pt-3 border-t border-border/40">
-          <Link href={`/projects/${project.slug}`} className="flex items-center gap-1 text-sm font-medium" style={{ color: colors.accent }}>
-            Case Study <ArrowRight size={13} />
-          </Link>
-          <div className="flex items-center gap-1 ml-auto">
-            {project.github && <a href={project.github} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"><Github size={14} /></a>}
-            {project.live && <a href={project.live} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"><ExternalLink size={14} /></a>}
+
+          {/* Screenshot thumbnail */}
+          {screenshot && (
+            <div className="hidden sm:block w-20 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-border/40">
+              <Image
+                src={screenshot}
+                alt={project.title}
+                width={80}
+                height={48}
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+          )}
+
+          {/* Title + meta */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="font-bold text-foreground text-base sm:text-lg truncate">{project.title}</h2>
+              <span
+                className={`px-2 py-0.5 text-[10px] font-semibold rounded-full border flex-shrink-0 ${status.cls}`}
+              >
+                {project.status === "live" ? "● " : ""}{status.label}
+              </span>
+            </div>
+            <div className="flex items-center gap-3 mt-1 flex-wrap">
+              <span className="text-xs text-muted-foreground font-mono">{project.category}</span>
+              <span className="text-border">·</span>
+              <div className="flex gap-1 flex-wrap">
+                {project.techStack.slice(0, 3).map((t) => (
+                  <span key={t} className="text-[10px] text-muted-foreground font-mono">{t}</span>
+                ))}
+                {project.techStack.length > 3 && (
+                  <span className="text-[10px] text-muted-foreground">+{project.techStack.length - 3}</span>
+                )}
+              </div>
+            </div>
           </div>
+
+          {/* Expand chevron */}
+          <motion.div
+            animate={{ rotate: isActive ? 45 : 0 }}
+            transition={{ duration: 0.25 }}
+            className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-colors duration-300"
+            style={{
+              background: isActive ? colors.glow : "hsl(var(--secondary))",
+              border: `1px solid ${isActive ? colors.border : "hsl(var(--border) / 0.4)"}`,
+            }}
+          >
+            <ArrowUpRight size={14} style={{ color: isActive ? colors.accent : undefined }} className={isActive ? "" : "text-muted-foreground"} />
+          </motion.div>
         </div>
+
+        {/* ── Expanded panel ───────────────────── */}
+        <AnimatePresence>
+          {isActive && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              {/* Divider */}
+              <div className="mx-5 sm:mx-7 h-px" style={{ background: colors.border }} />
+
+              <div className="flex flex-col lg:flex-row gap-0">
+                {/* Browser preview */}
+                <div className="lg:w-[58%] p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
+                  <BrowserFrame
+                    screenshotSrc={screenshot}
+                    liveUrl={project.live ?? undefined}
+                    title={project.title}
+                    accent={colors.accent}
+                    height={260}
+                    embedBlocked={EMBED_BLOCKED.has(project.slug)}
+                  />
+                </div>
+
+                {/* Info */}
+                <div className="lg:w-[42%] p-5 sm:p-6 lg:p-7 flex flex-col justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                      {project.description}
+                    </p>
+
+                    {/* Metrics */}
+                    {project.metrics && (
+                      <div className="flex gap-4 mb-5">
+                        {Object.entries(project.metrics).slice(0, 3).map(([k, v]) => (
+                          <div key={k}>
+                            <div className="text-base font-bold" style={{ color: colors.accent }}>{v}</div>
+                            <div className="text-[10px] text-muted-foreground capitalize">{k.replace(/([A-Z])/g, " $1").trim()}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Tech chips */}
+                    <div className="flex flex-wrap gap-1.5 mb-5">
+                      {project.techStack.map((t) => (
+                        <span
+                          key={t}
+                          className="px-2.5 py-1 text-[11px] rounded-lg font-mono text-muted-foreground"
+                          style={{ background: colors.glow, border: `1px solid ${colors.border}` }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-3 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                    <Link
+                      href={`/projects/${project.slug}`}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white hover:-translate-y-0.5 transition-transform"
+                      style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)`, boxShadow: `0 6px 20px ${colors.glow}` }}
+                    >
+                      Case Study <ArrowUpRight size={13} />
+                    </Link>
+                    {project.github && (
+                      <a href={project.github} target="_blank" rel="noopener noreferrer"
+                        className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors border border-border/40">
+                        <Github size={15} />
+                      </a>
+                    )}
+                    {project.live && (
+                      <a href={project.live} target="_blank" rel="noopener noreferrer"
+                        className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors border border-border/40">
+                        <ExternalLink size={15} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </article>
+    </motion.div>
   );
 }
 
-/* ─── Page ───────────────────────────────────────────── */
+/* ─── Page ────────────────────────────────────────────── */
 export default function ProjectsPage() {
-  const [mounted, setMounted] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [search, setSearch] = useState("");
+  const [mounted, setMounted]           = useState(false);
+  const [activeCategory, setCategory]   = useState("All");
+  const [search, setSearch]             = useState("");
+  const [activeId, setActiveId]         = useState<string | null>(projects[0]?.id ?? null);
 
   useEffect(() => { setMounted(true); }, []);
 
   const filtered = projects.filter((p) => {
-    const matchCat = activeCategory === "All" || p.category === activeCategory;
-    const matchSearch =
-      !search ||
+    const matchCat    = activeCategory === "All" || p.category === activeCategory;
+    const matchSearch = !search ||
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.techStack.some((t) => t.toLowerCase().includes(search.toLowerCase())) ||
       p.description.toLowerCase().includes(search.toLowerCase());
@@ -164,7 +245,8 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
+
+      {/* ── Header ──────────────────────────────── */}
       <section className="section border-b border-border/30">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -177,35 +259,42 @@ export default function ProjectsPage() {
               <span className="gradient-text"> Built</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
-              Full-stack applications built with the MERN stack — from concept to production deployment, with live demos you can explore right here.
+              Full-stack applications built with the MERN stack — from concept to production, with live previews.
             </p>
           </motion.div>
 
-          {/* Search & Filters */}
+          {/* Controls */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-wrap gap-3 mt-8"
+            className="flex flex-wrap items-center gap-3 mt-8"
           >
-            <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            {/* Search */}
+            <div className="relative flex-1 min-w-[180px] max-w-xs">
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search projects or tech..."
-                className="w-full pl-9 pr-4 py-2 text-sm bg-secondary/50 border border-border/40 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                placeholder="Search projects or tech…"
+                className="w-full pl-8 pr-8 py-2 text-sm bg-secondary/50 border border-border/40 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
               />
+              {search && (
+                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  <X size={13} />
+                </button>
+              )}
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Filter size={14} className="text-muted-foreground" />
+
+            {/* Category pills */}
+            <div className="flex gap-2">
               {categories.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${
+                  onClick={() => setCategory(cat)}
+                  className={`px-3.5 py-1.5 text-sm rounded-lg border font-medium transition-all ${
                     activeCategory === cat
-                      ? "bg-primary text-primary-foreground border-primary"
+                      ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
                       : "border-border/40 text-muted-foreground hover:text-foreground hover:border-primary/30 glass"
                   }`}
                 >
@@ -213,130 +302,51 @@ export default function ProjectsPage() {
                 </button>
               ))}
             </div>
+
+            {/* Count */}
+            <span className="text-xs text-muted-foreground ml-auto">
+              {filtered.length} project{filtered.length !== 1 ? "s" : ""}
+            </span>
           </motion.div>
         </div>
       </section>
 
-      {/* Projects Grid (desktop) / Carousel (mobile) */}
+      {/* ── Project list ────────────────────────── */}
       <section className="section">
-        <div className="container">
+        <div className="container max-w-4xl">
           {!mounted ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-4">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-72 glass border border-border/40 rounded-2xl animate-pulse" />
+                <div key={i} className="h-20 glass border border-border/40 rounded-2xl animate-pulse" />
               ))}
             </div>
           ) : (
-            <AnimatePresence mode="wait">
-              {/* Mobile: Embla Carousel */}
-              <div className="block sm:hidden">
-                <ProjectCarousel items={filtered} />
-              </div>
-
-              {/* Desktop: Grid */}
-              <motion.div
-                key={activeCategory + search}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="hidden sm:grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6"
-              >
-                {filtered.map((project, i) => {
-                  const colors = PROJECT_ACCENTS[project.slug] ?? PROJECT_ACCENTS["ecommerce-website"];
-                  const screenshot = SCREENSHOTS[project.slug];
-
-                  return (
-                    <motion.article
+            <AnimatePresence mode="popLayout">
+              {filtered.length === 0 ? (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-24 text-muted-foreground"
+                >
+                  <div className="text-5xl mb-4 opacity-20">🔍</div>
+                  <p className="text-lg font-medium mb-1">No projects found</p>
+                  <p className="text-sm">Try a different search or filter</p>
+                </motion.div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {filtered.map((project, i) => (
+                    <ProjectCard
                       key={project.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-60px" }}
-                      transition={{ delay: i * 0.08, duration: 0.5 }}
-                      className="group relative flex flex-col glass border border-border/40 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = colors.border;
-                        (e.currentTarget as HTMLElement).style.boxShadow = `0 20px 60px -12px ${colors.bg}`;
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border) / 0.4)";
-                        (e.currentTarget as HTMLElement).style.boxShadow = "";
-                      }}
-                    >
-                      {/* Top accent line */}
-                      <div
-                        className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
-                        style={{ background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)` }}
-                      />
-
-                      {/* Browser Preview */}
-                      <div className="p-3 pb-0">
-                        <BrowserFrame
-                          screenshotSrc={screenshot}
-                          liveUrl={project.live ?? undefined}
-                          title={project.title}
-                          accent={colors.accent}
-                          height={220}
-                          embedBlocked={EMBED_BLOCKED.has(project.slug)}
-                        />
-                      </div>
-
-                      <div className="p-6 flex flex-col flex-1">
-                        <div className="flex items-start justify-between gap-2 mb-3">
-                          <div>
-                            <div className="text-[10px] font-mono uppercase tracking-widest font-semibold mb-1" style={{ color: colors.accent }}>
-                              {project.category} · {project.year}
-                            </div>
-                            <h2 className="font-bold text-foreground text-lg">{project.title}</h2>
-                          </div>
-                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full border flex-shrink-0 ${statusColors[project.status]}`}>
-                            {project.status === "live" ? "● Live" : project.status === "completed" ? "Completed" : "WIP"}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">
-                          {project.description}
-                        </p>
-
-                        <div className="flex flex-wrap gap-1.5 mb-5">
-                          {project.techStack.slice(0, 5).map((tech) => (
-                            <span key={tech} className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono">
-                              {tech}
-                            </span>
-                          ))}
-                          {project.techStack.length > 5 && (
-                            <span className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono">
-                              +{project.techStack.length - 5}
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-                          <Link href={`/projects/${project.slug}`} className="flex items-center gap-1.5 text-sm font-medium transition-colors" style={{ color: colors.accent }}>
-                            Case Study <ArrowRight size={13} />
-                          </Link>
-                          {project.github && (
-                            <a href={project.github} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors ml-auto" aria-label="GitHub">
-                              <Github size={15} />
-                            </a>
-                          )}
-                          {project.live && (
-                            <a href={project.live} target="_blank" rel="noopener noreferrer" className={`p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors ${!project.github ? "ml-auto" : ""}`} aria-label="Live Demo">
-                              <ExternalLink size={15} />
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </motion.article>
-                  );
-                })}
-              </motion.div>
+                      project={project}
+                      globalIndex={i}
+                      isActive={activeId === project.id}
+                      onToggle={() => setActiveId(activeId === project.id ? null : project.id)}
+                    />
+                  ))}
+                </div>
+              )}
             </AnimatePresence>
-          )}
-
-          {mounted && filtered.length === 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 text-muted-foreground">
-              <Layers size={48} className="mx-auto mb-4 opacity-20" />
-              <p>No projects found matching your search.</p>
-            </motion.div>
           )}
         </div>
       </section>
