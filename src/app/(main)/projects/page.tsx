@@ -30,6 +30,9 @@ const SCREENSHOTS: Record<string, string> = {
   cinevault: "/previews/cinevault.png",
 };
 
+/* Sites that send X-Frame-Options: DENY */
+const EMBED_BLOCKED = new Set(["kidzoo"]);
+
 /* ─── Mobile Embla carousel ─────────────────────────── */
 function ProjectCarousel({ items }: { items: typeof projects }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
@@ -109,6 +112,7 @@ function MobileProjectCard({
           title={project.title}
           accent={colors.accent}
           height={180}
+          embedBlocked={EMBED_BLOCKED.has(project.slug)}
         />
       </div>
       <div className="p-5">
@@ -270,6 +274,7 @@ export default function ProjectsPage() {
                           title={project.title}
                           accent={colors.accent}
                           height={220}
+                          embedBlocked={EMBED_BLOCKED.has(project.slug)}
                         />
                       </div>
 

@@ -12,6 +12,8 @@ interface BrowserFrameProps {
   title: string;
   accent?: string;
   height?: number;
+  /** Pass true when the site sends X-Frame-Options: DENY — skips iframe, shows screenshot */
+  embedBlocked?: boolean;
 }
 
 const IFRAME_W = 1280;
@@ -23,6 +25,7 @@ export function BrowserFrame({
   title,
   accent = "hsl(252 87% 63%)",
   height = 220,
+  embedBlocked = false,
 }: BrowserFrameProps) {
   const [hovered, setHovered] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
@@ -54,7 +57,7 @@ export function BrowserFrame({
   }, []);
 
   const displayUrl = liveUrl ? liveUrl.replace(/^https?:\/\//, "") : "localhost:3000";
-  const showIframe = liveUrl && inView && scale > 0 && !iframeError;
+  const showIframe = liveUrl && inView && scale > 0 && !iframeError && !embedBlocked;
 
   return (
     <>

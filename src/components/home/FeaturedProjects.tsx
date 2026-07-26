@@ -45,6 +45,9 @@ const SCREENSHOTS: Record<string, string> = {
   cinevault: "/previews/cinevault.png",
 };
 
+/* Sites that send X-Frame-Options: DENY — iframe embedding blocked */
+const EMBED_BLOCKED = new Set(["kidzoo"]);
+
 const DEFAULT_ACCENT = {
   accent: "hsl(252 87% 63%)",
   bg: "hsl(252 87% 63% / 0.06)",
@@ -152,6 +155,7 @@ export function FeaturedProjects() {
                       title={project.title}
                       accent={colors.accent}
                       height={i === 0 ? 200 : 160}
+                      embedBlocked={EMBED_BLOCKED.has(project.slug)}
                     />
                   </div>
 
