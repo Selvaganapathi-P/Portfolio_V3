@@ -71,6 +71,72 @@ export const experience = [
 
 export const projects = [
   {
+    id: "educore-erp",
+    slug: "educore-erp",
+    title: "EduCore ERP",
+    subtitle: "Multi-Tenant School Management SaaS Platform",
+    description:
+      "A comprehensive multi-tenant school ERP SaaS with 20+ modules — admissions, attendance, exams, fees, transport, library, hostel, inventory, health records, communication, and an AI dashboard with chat, insights, and content generation.",
+    longDescription:
+      "EduCore ERP is a production-deployed, multi-tenant school management platform built as a SaaS. A Super Admin layer manages multiple schools (tenants), billing, and platform-wide users. Each school gets a dedicated admin dashboard with full control over academics, staff, students, finances, and operations. The AI layer provides a chat assistant, school insights analytics, and a content generator for teachers. Built with React 18, TanStack Query, Zustand, Radix UI, and a Node.js/Express/MongoDB backend — containerised with Docker and deployed on Vercel + Render.",
+    github: "https://github.com/Selvaganapathi-P/educore-erp",
+    live: "https://educore-web-nu.vercel.app",
+    status: "live" as const,
+    featured: true,
+    category: "Full Stack",
+    year: 2026,
+    problem:
+      "Schools rely on disconnected tools for admissions, attendance, fees, timetables, and communication — causing data silos, manual overhead, and poor visibility for administrators.",
+    solution:
+      "Built a single multi-tenant SaaS platform where a Super Admin onboards schools and each school gets an isolated, role-gated dashboard covering every operational module — from student admissions to AI-powered insights.",
+    architecture:
+      "React 18 SPA (Vite + Tailwind + Radix UI) with TanStack Query for server state and Zustand for client state. Express.js REST API with JWT auth, rate limiting, and Mongoose schemas. Docker-compose for local dev; frontend on Vercel, backend on Render. MongoDB Atlas for data persistence.",
+    challenges: [
+      "Designing a multi-tenant data model where each school's data is fully isolated",
+      "Building 20+ feature modules with consistent role-based access across Super Admin, School Admin, Teacher, and Student roles",
+      "Integrating an AI layer (chat, insights, content generation) alongside traditional ERP workflows",
+    ],
+    metrics: {
+      modules: "20+",
+      roles: "4",
+      deployed: "Vercel + Render",
+    },
+    techStack: [
+      "React.js",
+      "Node.js",
+      "Express.js",
+      "MongoDB",
+      "TanStack Query",
+      "Zustand",
+      "JWT",
+      "Radix UI",
+      "Recharts",
+      "Tailwind CSS",
+      "Docker",
+      "Render",
+    ],
+    features: [
+      "Multi-Tenant Architecture (Super Admin + School tenants)",
+      "Super Admin: Schools, Billing, Platform Users",
+      "Admissions & Student Management",
+      "Staff Management",
+      "Academics: Classes, Subjects, Timetable",
+      "Attendance (Student, Staff, Reports)",
+      "Exams, Mark Entry & Results",
+      "Fee Management (Collection, Structures, Outstanding)",
+      "Transport (Vehicles, Routes, Assignments)",
+      "Library (Books, Issue/Return)",
+      "Hostel (Rooms, Allotments)",
+      "Inventory & Stock Movements",
+      "Health Records & Medical Visits",
+      "Events & Certificates",
+      "Communication (Announcements, Messages)",
+      "Comprehensive Reports Dashboard",
+      "AI Dashboard (Chat, Insights, Content Generator)",
+      "Role-Based Access Control (4 roles)",
+    ],
+  },
+  {
     id: "ecommerce-website",
     slug: "ecommerce-website",
     title: "E-commerce Website",
@@ -330,7 +396,7 @@ export const techStack = [
 ];
 
 export const stats = [
-  { label: "Projects Built", value: "4+", suffix: "" },
+  { label: "Projects Built", value: "5+", suffix: "" },
   { label: "Months of Experience", value: "5", suffix: "mo" },
   { label: "Technologies", value: "15+", suffix: "" },
   { label: "CGPA", value: "8.1", suffix: "/10" },

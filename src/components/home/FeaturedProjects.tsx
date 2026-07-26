@@ -12,6 +12,12 @@ const PROJECT_ACCENTS: Record<
   string,
   { accent: string; bg: string; border: string; number: string }
 > = {
+  "educore-erp": {
+    accent: "hsl(168 74% 43%)",
+    bg: "hsl(168 74% 43% / 0.06)",
+    border: "hsl(168 74% 43% / 0.35)",
+    number: "hsl(168 74% 43% / 0.22)",
+  },
   "ecommerce-website": {
     accent: "hsl(252 87% 63%)",
     bg: "hsl(252 87% 63% / 0.06)",
@@ -39,14 +45,15 @@ const PROJECT_ACCENTS: Record<
 };
 
 const SCREENSHOTS: Record<string, string> = {
+  "educore-erp": "/previews/educore.png",
   "ecommerce-website": "/previews/ecommerce.png",
   studiopro: "/previews/studiopro.png",
   kidzoo: "/previews/kidzoo.png",
   cinevault: "/previews/cinevault.png",
 };
 
-/* Sites that send X-Frame-Options: DENY — iframe embedding blocked */
-const EMBED_BLOCKED = new Set(["kidzoo"]);
+/* Sites that block cross-origin iframe embedding */
+const EMBED_BLOCKED = new Set(["kidzoo", "educore-erp"]);
 
 const DEFAULT_ACCENT = {
   accent: "hsl(252 87% 63%)",

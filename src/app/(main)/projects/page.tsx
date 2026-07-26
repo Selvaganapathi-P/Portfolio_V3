@@ -17,6 +17,7 @@ const statusColors = {
 };
 
 const PROJECT_ACCENTS: Record<string, { accent: string; bg: string; border: string }> = {
+  "educore-erp":       { accent: "hsl(168 74% 43%)", bg: "hsl(168 74% 43% / 0.06)", border: "hsl(168 74% 43% / 0.3)" },
   "ecommerce-website": { accent: "hsl(252 87% 63%)", bg: "hsl(252 87% 63% / 0.06)", border: "hsl(252 87% 63% / 0.3)" },
   studiopro:           { accent: "hsl(199 89% 52%)", bg: "hsl(199 89% 52% / 0.06)", border: "hsl(199 89% 52% / 0.3)" },
   kidzoo:              { accent: "hsl(142 71% 45%)", bg: "hsl(142 71% 45% / 0.06)", border: "hsl(142 71% 45% / 0.3)" },
@@ -24,14 +25,15 @@ const PROJECT_ACCENTS: Record<string, { accent: string; bg: string; border: stri
 };
 
 const SCREENSHOTS: Record<string, string> = {
+  "educore-erp":       "/previews/educore.png",
   "ecommerce-website": "/previews/ecommerce.png",
   studiopro: "/previews/studiopro.png",
   kidzoo:    "/previews/kidzoo.png",
   cinevault: "/previews/cinevault.png",
 };
 
-/* Sites that send X-Frame-Options: DENY */
-const EMBED_BLOCKED = new Set(["kidzoo"]);
+/* Sites that block cross-origin iframe embedding */
+const EMBED_BLOCKED = new Set(["kidzoo", "educore-erp"]);
 
 /* ─── Mobile Embla carousel ─────────────────────────── */
 function ProjectCarousel({ items }: { items: typeof projects }) {

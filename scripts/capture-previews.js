@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 const SITES = [
+  { url: 'https://educore-web-nu.vercel.app/', name: 'educore' },
   { url: 'https://thanselzovia.vercel.app', name: 'ecommerce' },
   { url: 'https://gle-studio.vercel.app/', name: 'studiopro' },
   { url: 'https://kidzoo-learn.vercel.app/', name: 'kidzoo' },
