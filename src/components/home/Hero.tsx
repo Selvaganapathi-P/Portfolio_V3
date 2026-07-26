@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import {
   motion,
   useScroll,
@@ -22,7 +22,6 @@ import { personal, stats } from "@/data/resume";
 import { TypeAnimation } from "react-type-animation";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
-import gsap from "gsap";
 
 /* ─── Stat Card with CountUp ──────────────────────────── */
 function StatCard({
@@ -77,7 +76,6 @@ function StatCard({
 /* ─── Hero ────────────────────────────────────────────── */
 export function Hero() {
   const heroRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({ target: heroRef });
   const y = useTransform(scrollYProgress, [0, 1], [0, -80]);
@@ -106,22 +104,6 @@ export function Hero() {
     mouseY.set(0);
   };
 
-  /* GSAP entrance timeline for text elements */
-  useEffect(() => {
-    if (!contentRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.from(".hero-line", {
-        y: 40,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.08,
-        ease: "power3.out",
-        delay: 0.1,
-      });
-    }, contentRef);
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section
       ref={heroRef}
@@ -131,18 +113,13 @@ export function Hero() {
     >
       {/* ── Background ────────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Atmosphere orbs */}
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-primary/8 blur-[140px] animate-pulse-slow" />
         <div
           className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-violet-500/8 blur-[120px] animate-pulse-slow"
           style={{ animationDelay: "2s" }}
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-cyan-500/4 blur-[180px]" />
-
-        {/* Grid pattern */}
         <div className="absolute inset-0 grid-pattern opacity-[0.022]" />
-
-        {/* Mouse spotlight */}
         <motion.div
           className="absolute inset-0"
           style={{ background: spotlight }}
@@ -154,14 +131,14 @@ export function Hero() {
         style={{ y, opacity: heroOpacity }}
         className="relative z-10 w-full px-6 sm:px-10 lg:px-16"
       >
-        <div ref={contentRef} className="w-full text-center">
+        <div className="w-full text-center">
 
           {/* Avatar */}
           <motion.div
             initial={{ opacity: 0, scale: 0.72 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.82, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="hero-line relative inline-block mb-5"
+            className="relative inline-block mb-5"
             style={{ perspective: "900px" }}
           >
             <motion.div style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}>
@@ -186,7 +163,6 @@ export function Hero() {
                 />
               </div>
             </motion.div>
-            {/* Online dot */}
             <span className="absolute bottom-2 right-2 flex h-4 w-4 z-10">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-background" />
@@ -198,7 +174,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.18 }}
-            className="hero-line inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass border border-primary/20 text-sm text-muted-foreground mb-5"
+            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass border border-primary/20 text-sm text-muted-foreground mb-5"
           >
             <span className="flex items-center gap-1.5 text-emerald-500 font-medium">
               <span className="relative flex h-1.5 w-1.5">
@@ -216,7 +192,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.82, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
-            className="hero-line text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[1.04] mb-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4"
+            className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[1.04] mb-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4"
           >
             <span className="text-foreground">
               {personal.name.split(" ")[0]}
@@ -231,27 +207,22 @@ export function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.36 }}
-            className="hero-line h-9 sm:h-10 lg:h-12 flex items-center justify-center mb-5"
+            className="h-9 sm:h-10 lg:h-12 flex items-center justify-center mb-5"
           >
             <TypeAnimation
               sequence={[
-                "Full Stack Engineer",
-                2800,
-                "MERN Stack Developer",
-                2800,
-                "React Specialist",
-                2800,
-                "API Architect",
-                2800,
-                "Node.js Developer",
-                2800,
+                "Full Stack Engineer",      2800,
+                "MERN Stack Developer",     2800,
+                "React Specialist",         2800,
+                "API Architect",            2800,
+                "Node.js Developer",        2800,
               ]}
               wrapper="span"
               speed={55}
               deletionSpeed={70}
               repeat={Infinity}
               className="gradient-text font-bold text-xl sm:text-2xl lg:text-3xl"
-              cursor={true}
+              cursor
             />
           </motion.div>
 
@@ -260,7 +231,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.46 }}
-            className="hero-line text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-7"
+            className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-7"
           >
             {personal.tagline}
           </motion.p>
@@ -270,7 +241,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.54 }}
-            className="hero-line flex flex-wrap items-center justify-center gap-3 mb-5"
+            className="flex flex-wrap items-center justify-center gap-3 mb-5"
           >
             <Link
               href="/projects"
@@ -303,10 +274,10 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.60 }}
-            className="hero-line flex items-center justify-center gap-3 mb-9"
+            className="flex items-center justify-center gap-3 mb-9"
           >
             {[
-              { href: personal.github, icon: Github, label: "GitHub" },
+              { href: personal.github,   icon: Github,   label: "GitHub"   },
               { href: personal.linkedin, icon: Linkedin, label: "LinkedIn" },
             ].map(({ href, icon: Icon, label }) => (
               <a
@@ -331,7 +302,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.66 }}
-            className="hero-line grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto"
           >
             {stats.map((stat, i) => (
               <StatCard key={stat.label} stat={stat} index={i} />
@@ -344,7 +315,7 @@ export function Hero() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.8 }}
+        transition={{ delay: 1.4 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
         <div className="w-5 h-8 rounded-full border border-border/50 flex items-start justify-center p-1.5">
