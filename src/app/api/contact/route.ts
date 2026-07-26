@@ -2,57 +2,59 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const contactSchema = z.object({
-  name: z.string().min(2).max(100),
-  email: z.string().email(),
+  name:    z.string().min(2).max(100),
+  email:   z.string().email(),
   subject: z.string().min(2).max(200),
   message: z.string().min(10).max(5000),
 });
-
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5001";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const data = contactSchema.parse(body);
 
-    // Forward to Express backend — persists to MongoDB
-    const res = await fetch(`${BACKEND_URL}/api/contact`, {
+    const resendKey = process.env.RESEND_API_KEY;
+    if (!resendKey) {
+      console.error("[contact] RESEND_API_KEY is not set");
+      return NextResponse.json({ error: "Email service not configured" }, { status: 503 });
+    }
+
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from:     "Portfolio Contact <onboarding@resend.dev>",
+        to:       ["selvaganapathims007@gmail.com"],
+        reply_to: data.email,
+        subject:  `[Portfolio] ${data.subject}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:600px;margin:auto">
+            <h2 style="color:#7c3aed">New Portfolio Message</h2>
+            <p><b>Name:</b> ${data.name}</p>
+            <p><b>Email:</b> <a href="mailto:${data.email}">${data.email}</a></p>
+            <p><b>Subject:</b> ${data.subject}</p>
+            <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0">
+            <p style="white-space:pre-wrap">${data.message}</p>
+          </div>
+        `,
+      }),
     });
 
-    const json = await res.json();
-
     if (!res.ok) {
-      return NextResponse.json({ error: json.message || "Failed to send" }, { status: res.status });
+      const err = await res.json().catch(() => ({}));
+      console.error("[contact] Resend error:", err);
+      return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
     }
 
-    // Also send email via Resend if key is configured
-    const resendKey = process.env.RESEND_API_KEY;
-    if (resendKey) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: "Portfolio Contact <onboarding@resend.dev>",
-          to: ["selvaganapathims007@gmail.com"],
-          reply_to: data.email,
-          subject: `[Portfolio] ${data.subject}`,
-          html: `<p><b>Name:</b> ${data.name}</p><p><b>Email:</b> ${data.email}</p><p><b>Message:</b><br>${data.message}</p>`,
-        }),
-      }).catch(() => {}); // Non-fatal — message already saved to DB
-    }
-
-    return NextResponse.json({ success: true, message: json.message });
+    return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid form data", details: error.errors }, { status: 400 });
     }
-    console.error("Contact API error:", error);
+    console.error("[contact] Unexpected error:", error);
     return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
   }
 }
