@@ -24,6 +24,7 @@ const PROJECT_ACCENTS: Record<string, { accent: string; bg: string; border: stri
 };
 
 const SCREENSHOTS: Record<string, string> = {
+  "ecommerce-website": "/previews/ecommerce.png",
   studiopro: "/previews/studiopro.png",
   kidzoo:    "/previews/kidzoo.png",
   cinevault: "/previews/cinevault.png",

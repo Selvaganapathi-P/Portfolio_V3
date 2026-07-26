@@ -80,8 +80,8 @@ export const projects = [
     longDescription:
       "A comprehensive full-stack application combining e-commerce functionality with expense tracking. The platform features a secure JWT-based authentication system, role-based access control for admins and users, a data visualization dashboard built with Recharts, and file upload capabilities using Multer. The admin dashboard provides complete control over products, orders, and user management.",
     github: "https://github.com/Selvaganapathi-P/ecommerce-expense",
-    live: null,
-    status: "completed" as const,
+    live: "https://thanselzovia.vercel.app",
+    status: "live" as const,
     featured: true,
     category: "Full Stack",
     year: 2024,
@@ -330,7 +330,7 @@ export const techStack = [
 ];
 
 export const stats = [
-  { label: "Projects Built", value: "3+", suffix: "" },
+  { label: "Projects Built", value: "4+", suffix: "" },
   { label: "Months of Experience", value: "5", suffix: "mo" },
   { label: "Technologies", value: "15+", suffix: "" },
   { label: "CGPA", value: "8.1", suffix: "/10" },
