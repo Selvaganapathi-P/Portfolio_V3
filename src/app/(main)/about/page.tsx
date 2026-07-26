@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { personal, education, stats } from "@/data/resume";
 import {
   GraduationCap,
@@ -15,36 +16,67 @@ import {
   Heart,
   Code2,
 } from "lucide-react";
+import CountUp from "react-countup";
+import { useInView } from "react-intersection-observer";
 
 const values = [
-  {
-    icon: Code2,
-    title: "Clean Code",
-    description: "Every line should be intentional. Readable, maintainable, and scalable.",
-  },
-  {
-    icon: Zap,
-    title: "Performance",
-    description: "Fast UIs and efficient APIs. Performance is a feature, not an afterthought.",
-  },
-  {
-    icon: Target,
-    title: "Problem First",
-    description: "Understanding the real problem before writing the first line of code.",
-  },
-  {
-    icon: Heart,
-    title: "User Focused",
-    description: "Building for humans. Great UX is the foundation of great software.",
-  },
+  { icon: Code2,   title: "Clean Code",     description: "Every line should be intentional. Readable, maintainable, and scalable." },
+  { icon: Zap,     title: "Performance",    description: "Fast UIs and efficient APIs. Performance is a feature, not an afterthought." },
+  { icon: Target,  title: "Problem First",  description: "Understanding the real problem before writing the first line of code." },
+  { icon: Heart,   title: "User Focused",   description: "Building for humans. Great UX is the foundation of great software." },
 ];
 
+function AnimatedStat({ stat, index }: { stat: (typeof stats)[0]; index: number }) {
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.4 });
+  const numeric = parseFloat(stat.value.replace(/[^0-9.]/g, ""));
+  const hasPlus = stat.value.includes("+");
+  const decimals = numeric % 1 !== 0 ? 1 : 0;
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, scale: 0.9, y: 16 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ scale: 1.04, y: -2 }}
+      className="glass border border-border/40 rounded-2xl p-6 text-center hover:border-primary/25 transition-colors cursor-default"
+    >
+      <div className="text-3xl font-bold gradient-text mb-1">
+        {inView ? (
+          <CountUp
+            start={0}
+            end={numeric}
+            duration={2.2}
+            decimals={decimals}
+            suffix={hasPlus ? "+" + stat.suffix : stat.suffix}
+            useEasing
+          />
+        ) : (
+          <span>{stat.value}{stat.suffix}</span>
+        )}
+      </div>
+      <div className="text-xs text-muted-foreground">{stat.label}</div>
+    </motion.div>
+  );
+}
+
 export default function AboutPage() {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const bgY = useTransform(scrollYProgress, [0, 1], [0, 60]);
+
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="section border-b border-border/30">
-        <div className="container">
+      {/* Hero with parallax */}
+      <section ref={heroRef} className="section border-b border-border/30 relative overflow-hidden">
+        {/* Parallax background orbs */}
+        <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-1/4 w-80 h-80 rounded-full bg-primary/6 blur-[100px]" />
+          <div className="absolute bottom-0 left-1/4 w-60 h-60 rounded-full bg-violet-500/6 blur-[80px]" />
+        </motion.div>
+
+        <div className="container relative z-10">
           <div className="max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -73,10 +105,10 @@ export default function AboutPage() {
               className="flex flex-wrap gap-4 mt-8"
             >
               {[
-                { icon: MapPin, text: personal.location },
-                { icon: Mail, text: personal.email, href: `mailto:${personal.email}` },
-                { icon: Github, text: "Selvaganapathi-P", href: personal.github },
-                { icon: Linkedin, text: "LinkedIn", href: personal.linkedin },
+                { icon: MapPin,    text: personal.location },
+                { icon: Mail,     text: personal.email,        href: `mailto:${personal.email}` },
+                { icon: Github,   text: "Selvaganapathi-P",     href: personal.github },
+                { icon: Linkedin, text: "LinkedIn",             href: personal.linkedin },
               ].map((item) => (
                 <div key={item.text}>
                   {item.href ? (
@@ -102,30 +134,18 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Stats with CountUp */}
       <section className="py-16 border-b border-border/30">
         <div className="container">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="glass border border-border/40 rounded-2xl p-6 text-center"
-              >
-                <div className="text-3xl font-bold gradient-text mb-1">
-                  {stat.value}<span className="text-lg">{stat.suffix}</span>
-                </div>
-                <div className="text-xs text-muted-foreground">{stat.label}</div>
-              </motion.div>
+              <AnimatedStat key={stat.label} stat={stat} index={i} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Story */}
+      {/* Story + Values */}
       <section className="section border-b border-border/30">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -133,6 +153,7 @@ export default function AboutPage() {
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
             >
               <h2 className="text-2xl sm:text-3xl font-bold mb-6">
                 My <span className="gradient-text">Story</span>
@@ -167,6 +188,7 @@ export default function AboutPage() {
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
             >
               <h2 className="text-2xl sm:text-3xl font-bold mb-6">
                 What I <span className="gradient-text">Value</span>
@@ -178,8 +200,9 @@ export default function AboutPage() {
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="flex gap-4 glass border border-border/40 rounded-xl p-4"
+                    transition={{ delay: i * 0.1, duration: 0.5 }}
+                    whileHover={{ x: 4 }}
+                    className="flex gap-4 glass border border-border/40 rounded-xl p-4 hover:border-primary/30 transition-all"
                   >
                     <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
                       <v.icon size={18} className="text-primary" />
@@ -219,8 +242,9 @@ export default function AboutPage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="glass border border-border/40 rounded-2xl p-8 hover:border-primary/30 transition-colors"
+              transition={{ delay: i * 0.1, duration: 0.55 }}
+              whileHover={{ y: -2 }}
+              className="glass border border-border/40 rounded-2xl p-8 hover:border-primary/30 transition-all"
             >
               <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                 <div className="flex gap-4">
@@ -233,11 +257,11 @@ export default function AboutPage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 text-sm text-muted-foreground text-right">
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-1.5 justify-end">
                     <Calendar size={13} />
                     {edu.startDate} – {edu.endDate}
                   </span>
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-1.5 justify-end">
                     <MapPin size={13} />
                     {edu.location}
                   </span>
@@ -259,7 +283,7 @@ export default function AboutPage() {
                   {edu.coursework.map((c) => (
                     <span
                       key={c}
-                      className="px-3 py-1 rounded-lg bg-secondary text-sm text-muted-foreground border border-border/50"
+                      className="px-3 py-1 rounded-lg bg-secondary text-sm text-muted-foreground border border-border/50 hover:border-primary/30 transition-colors"
                     >
                       {c}
                     </span>

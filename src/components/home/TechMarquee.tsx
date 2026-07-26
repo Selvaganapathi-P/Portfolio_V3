@@ -1,5 +1,7 @@
 "use client";
 
+import Marquee from "react-fast-marquee";
+
 const ROW_ONE = [
   { name: "React.js",     cat: "frontend" },
   { name: "Node.js",      cat: "backend"  },
@@ -35,42 +37,51 @@ const CAT_COLORS: Record<string, string> = {
   tools:    "hsl(240 5% 58%)",
 };
 
-function MarqueeRow({ items, reverse = false }: { items: typeof ROW_ONE; reverse?: boolean }) {
-  const doubled = [...items, ...items];
+function TechChip({ item }: { item: { name: string; cat: string } }) {
   return (
-    <div
-      className={`flex gap-3 w-max ${reverse ? "animate-marquee-reverse" : "animate-marquee"}`}
-      aria-hidden="true"
-    >
-      {doubled.map((item, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg glass border border-border/30 text-sm font-mono text-muted-foreground whitespace-nowrap select-none"
-        >
-          <div
-            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-            style={{
-              background: CAT_COLORS[item.cat],
-              boxShadow: `0 0 5px ${CAT_COLORS[item.cat]}`,
-            }}
-          />
-          {item.name}
-        </div>
-      ))}
+    <div className="flex items-center gap-2 px-4 py-2 mx-1.5 rounded-lg glass border border-border/30 text-sm font-mono text-muted-foreground whitespace-nowrap select-none hover:border-primary/30 hover:text-foreground transition-colors">
+      <div
+        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+        style={{
+          background: CAT_COLORS[item.cat],
+          boxShadow: `0 0 5px ${CAT_COLORS[item.cat]}`,
+        }}
+      />
+      {item.name}
     </div>
   );
 }
 
 export function TechMarquee() {
   return (
-    <div className="relative py-8 overflow-hidden border-y border-border/20 marquee-pause">
-      {/* Fade edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-r from-background to-transparent pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-20 z-10 bg-gradient-to-l from-background to-transparent pointer-events-none" />
-
+    <div className="relative py-8 overflow-hidden border-y border-border/20">
       <div className="space-y-3">
-        <MarqueeRow items={ROW_ONE} />
-        <MarqueeRow items={ROW_TWO} reverse />
+        {/* Row 1 — left to right */}
+        <Marquee
+          speed={38}
+          gradient
+          gradientColor="var(--marquee-fade-color, hsl(240 10% 3.9%))"
+          gradientWidth={80}
+          pauseOnHover
+        >
+          {ROW_ONE.map((item) => (
+            <TechChip key={item.name} item={item} />
+          ))}
+        </Marquee>
+
+        {/* Row 2 — right to left */}
+        <Marquee
+          speed={32}
+          direction="right"
+          gradient
+          gradientColor="var(--marquee-fade-color, hsl(240 10% 3.9%))"
+          gradientWidth={80}
+          pauseOnHover
+        >
+          {ROW_TWO.map((item) => (
+            <TechChip key={item.name} item={item} />
+          ))}
+        </Marquee>
       </div>
     </div>
   );

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Github, ExternalLink, ArrowRight, Layers, Search, Filter } from "lucide-react";
+import { Github, ExternalLink, ArrowRight, Layers, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 import { projects } from "@/data/resume";
-import { ProjectCardSkeleton } from "@/components/ui/skeleton";
+import { BrowserFrame } from "@/components/ui/BrowserFrame";
 
 const categories = ["All", "Full Stack", "Frontend"];
 
@@ -15,6 +16,128 @@ const statusColors = {
   wip: "bg-amber-500/10 text-amber-500 border-amber-500/20",
 };
 
+const PROJECT_ACCENTS: Record<string, { accent: string; bg: string; border: string }> = {
+  "ecommerce-website": { accent: "hsl(252 87% 63%)", bg: "hsl(252 87% 63% / 0.06)", border: "hsl(252 87% 63% / 0.3)" },
+  studiopro:           { accent: "hsl(199 89% 52%)", bg: "hsl(199 89% 52% / 0.06)", border: "hsl(199 89% 52% / 0.3)" },
+  kidzoo:              { accent: "hsl(142 71% 45%)", bg: "hsl(142 71% 45% / 0.06)", border: "hsl(142 71% 45% / 0.3)" },
+  cinevault:           { accent: "hsl(24 95% 55%)",  bg: "hsl(24 95% 55% / 0.06)",  border: "hsl(24 95% 55% / 0.3)"  },
+};
+
+const SCREENSHOTS: Record<string, string> = {
+  studiopro: "/previews/studiopro.png",
+  kidzoo:    "/previews/kidzoo.png",
+  cinevault: "/previews/cinevault.png",
+};
+
+/* ─── Mobile Embla carousel ─────────────────────────── */
+function ProjectCarousel({ items }: { items: typeof projects }) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(true);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanPrev(emblaApi.canScrollPrev());
+    setCanNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on("select", onSelect);
+    onSelect();
+  }, [emblaApi, onSelect]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="relative">
+      <div className="overflow-hidden rounded-2xl" ref={emblaRef}>
+        <div className="flex">
+          {items.map((project) => {
+            const colors = PROJECT_ACCENTS[project.slug] ?? PROJECT_ACCENTS["ecommerce-website"];
+            const screenshot = SCREENSHOTS[project.slug];
+            return (
+              <div key={project.id} className="flex-[0_0_90%] min-w-0 pl-4">
+                <MobileProjectCard
+                  project={project}
+                  colors={colors}
+                  screenshot={screenshot}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {/* Nav buttons */}
+      <div className="flex items-center justify-center gap-3 mt-4">
+        <button
+          onClick={() => emblaApi?.scrollPrev()}
+          disabled={!canPrev}
+          className="p-2 rounded-full glass border border-border/40 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <button
+          onClick={() => emblaApi?.scrollNext()}
+          disabled={!canNext}
+          className="p-2 rounded-full glass border border-border/40 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Single card (shared by grid & carousel) ───────── */
+function MobileProjectCard({
+  project,
+  colors,
+  screenshot,
+}: {
+  project: typeof projects[0];
+  colors: { accent: string; bg: string; border: string };
+  screenshot?: string;
+}) {
+  return (
+    <article className="glass border border-border/40 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300">
+      <div className="p-3 pb-0">
+        <BrowserFrame
+          screenshotSrc={screenshot}
+          liveUrl={project.live ?? undefined}
+          title={project.title}
+          accent={colors.accent}
+          height={180}
+        />
+      </div>
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h2 className="font-bold text-foreground text-base">{project.title}</h2>
+          <span className={`px-2 py-0.5 text-xs font-medium rounded-full border flex-shrink-0 ${statusColors[project.status]}`}>
+            {project.status === "live" ? "● Live" : project.status === "completed" ? "Done" : "WIP"}
+          </span>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-3">{project.description}</p>
+        <div className="flex flex-wrap gap-1 mb-3">
+          {project.techStack.slice(0, 4).map((t) => (
+            <span key={t} className="px-2 py-0.5 text-[10px] rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono">{t}</span>
+          ))}
+        </div>
+        <div className="flex items-center gap-3 pt-3 border-t border-border/40">
+          <Link href={`/projects/${project.slug}`} className="flex items-center gap-1 text-sm font-medium" style={{ color: colors.accent }}>
+            Case Study <ArrowRight size={13} />
+          </Link>
+          <div className="flex items-center gap-1 ml-auto">
+            {project.github && <a href={project.github} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"><Github size={14} /></a>}
+            {project.live && <a href={project.live} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"><ExternalLink size={14} /></a>}
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* ─── Page ───────────────────────────────────────────── */
 export default function ProjectsPage() {
   const [mounted, setMounted] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
@@ -47,7 +170,7 @@ export default function ProjectsPage() {
               <span className="gradient-text"> Built</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl">
-              A collection of full-stack applications built with the MERN stack, from concept to production deployment.
+              Full-stack applications built with the MERN stack — from concept to production deployment, with live demos you can explore right here.
             </p>
           </motion.div>
 
@@ -87,119 +210,122 @@ export default function ProjectsPage() {
         </div>
       </section>
 
-      {/* Projects Grid */}
+      {/* Projects Grid (desktop) / Carousel (mobile) */}
       <section className="section">
         <div className="container">
           {!mounted ? (
-            /* Skeleton state */
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {[0, 1, 2].map((i) => <ProjectCardSkeleton key={i} />)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-72 glass border border-border/40 rounded-2xl animate-pulse" />
+              ))}
             </div>
           ) : (
             <AnimatePresence mode="wait">
+              {/* Mobile: Embla Carousel */}
+              <div className="block sm:hidden">
+                <ProjectCarousel items={filtered} />
+              </div>
+
+              {/* Desktop: Grid */}
               <motion.div
                 key={activeCategory + search}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                className="hidden sm:grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6"
               >
-                {filtered.map((project, i) => (
-                  <motion.article
-                    key={project.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-60px" }}
-                    transition={{ delay: i * 0.08, duration: 0.5 }}
-                    className="group relative flex flex-col glass border border-border/40 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
-                  >
-                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+                {filtered.map((project, i) => {
+                  const colors = PROJECT_ACCENTS[project.slug] ?? PROJECT_ACCENTS["ecommerce-website"];
+                  const screenshot = SCREENSHOTS[project.slug];
 
-                    {/* Placeholder image area */}
-                    <div className="h-40 bg-gradient-to-br from-primary/5 via-violet-500/5 to-cyan-500/5 border-b border-border/30 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 grid-pattern opacity-5" />
-                      <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                        <Layers size={28} className="text-primary" />
-                      </div>
-                      <div className="absolute top-3 right-3">
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${statusColors[project.status]}`}>
-                          {project.status === "live" ? "● Live" : project.status === "completed" ? "Completed" : "WIP"}
-                        </span>
-                      </div>
-                      <div className="absolute bottom-3 left-3 text-xs text-muted-foreground font-mono">
-                        {project.year}
-                      </div>
-                    </div>
+                  return (
+                    <motion.article
+                      key={project.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-60px" }}
+                      transition={{ delay: i * 0.08, duration: 0.5 }}
+                      className="group relative flex flex-col glass border border-border/40 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5"
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.borderColor = colors.border;
+                        (e.currentTarget as HTMLElement).style.boxShadow = `0 20px 60px -12px ${colors.bg}`;
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "hsl(var(--border) / 0.4)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "";
+                      }}
+                    >
+                      {/* Top accent line */}
+                      <div
+                        className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+                        style={{ background: `linear-gradient(90deg, transparent, ${colors.accent}, transparent)` }}
+                      />
 
-                    <div className="p-6 flex flex-col flex-1">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <h2 className="font-bold text-foreground group-hover:text-primary transition-colors text-lg">
-                          {project.title}
-                        </h2>
+                      {/* Browser Preview */}
+                      <div className="p-3 pb-0">
+                        <BrowserFrame
+                          screenshotSrc={screenshot}
+                          liveUrl={project.live ?? undefined}
+                          title={project.title}
+                          accent={colors.accent}
+                          height={220}
+                        />
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">
-                        {project.description}
-                      </p>
 
-                      <div className="flex flex-wrap gap-1.5 mb-5">
-                        {project.techStack.slice(0, 4).map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50"
-                          >
-                            {tech}
+                      <div className="p-6 flex flex-col flex-1">
+                        <div className="flex items-start justify-between gap-2 mb-3">
+                          <div>
+                            <div className="text-[10px] font-mono uppercase tracking-widest font-semibold mb-1" style={{ color: colors.accent }}>
+                              {project.category} · {project.year}
+                            </div>
+                            <h2 className="font-bold text-foreground text-lg">{project.title}</h2>
+                          </div>
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full border flex-shrink-0 ${statusColors[project.status]}`}>
+                            {project.status === "live" ? "● Live" : project.status === "completed" ? "Completed" : "WIP"}
                           </span>
-                        ))}
-                        {project.techStack.length > 4 && (
-                          <span className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50">
-                            +{project.techStack.length - 4}
-                          </span>
-                        )}
-                      </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">
+                          {project.description}
+                        </p>
 
-                      <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-                        <Link
-                          href={`/projects/${project.slug}`}
-                          className="flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
-                        >
-                          Case Study <ArrowRight size={13} />
-                        </Link>
-                        {project.github && (
-                          <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors ml-auto"
-                            aria-label="GitHub"
-                          >
-                            <Github size={15} />
-                          </a>
-                        )}
-                        {project.live && (
-                          <a
-                            href={project.live}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors ${!project.github ? "ml-auto" : ""}`}
-                            aria-label="Live Demo"
-                          >
-                            <ExternalLink size={15} />
-                          </a>
-                        )}
+                        <div className="flex flex-wrap gap-1.5 mb-5">
+                          {project.techStack.slice(0, 5).map((tech) => (
+                            <span key={tech} className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono">
+                              {tech}
+                            </span>
+                          ))}
+                          {project.techStack.length > 5 && (
+                            <span className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono">
+                              +{project.techStack.length - 5}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-3 pt-4 border-t border-border/50">
+                          <Link href={`/projects/${project.slug}`} className="flex items-center gap-1.5 text-sm font-medium transition-colors" style={{ color: colors.accent }}>
+                            Case Study <ArrowRight size={13} />
+                          </Link>
+                          {project.github && (
+                            <a href={project.github} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors ml-auto" aria-label="GitHub">
+                              <Github size={15} />
+                            </a>
+                          )}
+                          {project.live && (
+                            <a href={project.live} target="_blank" rel="noopener noreferrer" className={`p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors ${!project.github ? "ml-auto" : ""}`} aria-label="Live Demo">
+                              <ExternalLink size={15} />
+                            </a>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </motion.article>
-                ))}
+                    </motion.article>
+                  );
+                })}
               </motion.div>
             </AnimatePresence>
           )}
 
           {mounted && filtered.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-20 text-muted-foreground"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 text-muted-foreground">
               <Layers size={48} className="mx-auto mb-4 opacity-20" />
               <p>No projects found matching your search.</p>
             </motion.div>
