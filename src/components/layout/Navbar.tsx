@@ -49,12 +49,13 @@ export function Navbar() {
 
   return (
     <>
-      {/* Scroll progress indicator */}
+      {/* Scroll progress indicator — gradient animated */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-[2px] z-[60] origin-left"
         style={{
           scaleX,
           background: "linear-gradient(90deg, hsl(252 87% 63%), hsl(271 91% 65%), hsl(199 89% 48%))",
+          boxShadow: "0 0 8px hsl(252 87% 63% / 0.4)",
         }}
       />
 
@@ -63,26 +64,37 @@ export function Navbar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           scrolled
-            ? "glass border-b border-[var(--glass-border)] shadow-lg shadow-black/5"
-            : "bg-transparent"
+            ? "glass border-b border-[var(--glass-border)] shadow-lg shadow-black/5 py-0"
+            : "bg-transparent py-1"
         )}
       >
         <div className="container">
-          <nav className="flex items-center justify-between h-16 lg:h-18">
-            {/* Logo */}
+          <nav className={cn(
+            "flex items-center justify-between transition-all duration-500",
+            scrolled ? "h-14" : "h-16 lg:h-18"
+          )}>
+            {/* Logo — with hover animation */}
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center shadow-lg shadow-primary/30">
+              <motion.div
+                className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center shadow-lg shadow-primary/30"
+                whileHover={{
+                  rotate: [0, -10, 10, -5, 0],
+                  scale: 1.1,
+                  boxShadow: "0 0 20px hsl(252 87% 63% / 0.5)",
+                }}
+                transition={{ duration: 0.5 }}
+              >
                 <span className="text-white text-xs font-bold font-mono">SP</span>
-              </div>
+              </motion.div>
               <span className="hidden sm:block font-semibold text-sm tracking-tight">
                 <span className="text-foreground">Selvaganapathi</span>
                 <span className="text-muted-foreground">.dev</span>
               </span>
             </Link>
 
-            {/* Desktop Nav */}
+            {/* Desktop Nav — with gradient underline hover */}
             <div className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
@@ -91,7 +103,7 @@ export function Navbar() {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "relative px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200",
+                      "relative px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 gradient-underline",
                       isActive
                         ? "text-foreground"
                         : "text-muted-foreground hover:text-foreground"
@@ -113,81 +125,91 @@ export function Navbar() {
             {/* Actions */}
             <div className="flex items-center gap-2">
               {/* Availability Badge */}
-              <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-medium">
+              <motion.div
+                className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-medium"
+                whileHover={{ scale: 1.05 }}
+              >
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                 </span>
                 Available
-              </div>
+              </motion.div>
 
-              {/* Social */}
-              <a
+              {/* Social — with hover glow */}
+              <motion.a
                 href={personal.github}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hidden sm:flex p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 aria-label="GitHub"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.2 }}
               >
                 <Github size={16} />
-              </a>
-              <a
+              </motion.a>
+              <motion.a
                 href={personal.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hidden sm:flex p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 aria-label="LinkedIn"
+                whileHover={{ scale: 1.1, rotate: -5 }}
+                transition={{ duration: 0.2 }}
               >
                 <Linkedin size={16} />
-              </a>
+              </motion.a>
 
               {/* Theme Toggle */}
               {mounted && (
-                <button
+                <motion.button
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                   className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                   aria-label="Toggle theme"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <AnimatePresence mode="wait">
                     {theme === "dark" ? (
                       <motion.div
                         key="moon"
-                        initial={{ scale: 0, rotate: -90 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        exit={{ scale: 0, rotate: 90 }}
-                        transition={{ duration: 0.2 }}
+                        initial={{ scale: 0, rotate: -90, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        exit={{ scale: 0, rotate: 90, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
                       >
                         <Moon size={16} />
                       </motion.div>
                     ) : (
                       <motion.div
                         key="sun"
-                        initial={{ scale: 0, rotate: -90 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        exit={{ scale: 0, rotate: 90 }}
-                        transition={{ duration: 0.2 }}
+                        initial={{ scale: 0, rotate: -90, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        exit={{ scale: 0, rotate: 90, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
                       >
                         <Sun size={16} />
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </button>
+                </motion.button>
               )}
 
               {/* Mobile Menu Toggle */}
-              <button
+              <motion.button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="lg:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 aria-label="Toggle menu"
+                whileTap={{ scale: 0.9 }}
               >
                 <AnimatePresence mode="wait">
                   {mobileOpen ? (
                     <motion.div
                       key="x"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                      transition={{ duration: 0.15 }}
+                      initial={{ scale: 0, rotate: -90 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      exit={{ scale: 0, rotate: 90 }}
+                      transition={{ duration: 0.2 }}
                     >
                       <X size={18} />
                     </motion.div>
@@ -203,7 +225,7 @@ export function Navbar() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </button>
+              </motion.button>
             </div>
           </nav>
         </div>
@@ -213,19 +235,19 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -20, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -20, filter: "blur(8px)" }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-0 top-16 z-40 lg:hidden glass border-b border-[var(--glass-border)] shadow-xl"
+            className="fixed inset-x-0 top-14 z-40 lg:hidden glass border-b border-[var(--glass-border)] shadow-xl"
           >
             <div className="container py-6">
               <div className="flex flex-col gap-1">
                 {navLinks.map((link, i) => (
                   <motion.div
                     key={link.href}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, x: -20, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
                     transition={{ delay: i * 0.05 }}
                   >
                     <Link
@@ -243,7 +265,12 @@ export function Navbar() {
                 ))}
               </div>
 
-              <div className="mt-6 pt-6 border-t border-border flex items-center gap-3">
+              <motion.div
+                className="mt-6 pt-6 border-t border-border flex items-center gap-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
                 <a href={personal.github} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                   <Github size={16} /> GitHub
@@ -252,7 +279,7 @@ export function Navbar() {
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                   <Linkedin size={16} /> LinkedIn
                 </a>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         )}

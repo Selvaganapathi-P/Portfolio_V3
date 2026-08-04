@@ -4,6 +4,7 @@ import { FeaturedProjects } from "@/components/home/FeaturedProjects";
 import { ExperiencePreview } from "@/components/home/ExperiencePreview";
 import { SkillsPreview } from "@/components/home/SkillsPreview";
 import { ContactCTA } from "@/components/home/ContactCTA";
+import { SectionDivider } from "@/components/ui/SectionDivider";
 import type { Metadata } from "next";
 import { personal } from "@/data/resume";
 
@@ -17,9 +18,13 @@ export default function HomePage() {
     <>
       <Hero />
       <TechMarquee />
+      <SectionDivider variant="wave" />
       <FeaturedProjects />
+      <SectionDivider variant="line" />
       <ExperiencePreview />
+      <SectionDivider variant="dots" />
       <SkillsPreview />
+      <SectionDivider variant="wave" />
       <ContactCTA />
     </>
   );

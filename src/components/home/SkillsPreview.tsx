@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { techStack, personal } from "@/data/resume";
+import { TextReveal } from "@/components/ui/TextReveal";
 
 /* Skill categories with intentional grouping.
    No percentage bars — they're subjective and patronizing. */
@@ -71,16 +72,28 @@ export function SkillsPreview() {
         >
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-px bg-primary" />
+              <motion.div
+                className="w-6 h-px bg-primary"
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                style={{ transformOrigin: "left" }}
+              />
               <span className="text-xs text-primary font-mono uppercase tracking-widest">Expertise</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Technical <span className="gradient-text">Skills</span>
-            </h2>
+            <TextReveal
+              as="h2"
+              style="blur-in"
+              stagger={0.06}
+              className="text-3xl sm:text-4xl font-bold tracking-tight"
+            >
+              Technical Skills
+            </TextReveal>
           </div>
           <Link
             href="/skills"
-            className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+            className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group gradient-underline"
           >
             Full overview
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -106,9 +119,11 @@ export function SkillsPreview() {
               >
                 {/* Category label */}
                 <div className="flex items-center gap-2 mb-2.5">
-                  <div
+                  <motion.div
                     className="w-1.5 h-1.5 rounded-full"
                     style={{ background: cat.color, boxShadow: `0 0 6px ${cat.color}` }}
+                    animate={{ scale: [1, 1.3, 1], opacity: [0.8, 1, 0.8] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: ci * 0.5 }}
                   />
                   <span
                     className="text-[10px] font-mono uppercase tracking-widest font-semibold"
@@ -127,7 +142,11 @@ export function SkillsPreview() {
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
                       transition={{ delay: ci * 0.06 + si * 0.04 }}
-                      whileHover={{ scale: 1.04, y: -1 }}
+                      whileHover={{
+                        scale: 1.08,
+                        y: -2,
+                        boxShadow: `0 4px 16px ${cat.bg}`,
+                      }}
                       className="px-3 py-1.5 text-sm rounded-lg font-medium transition-colors cursor-default border"
                       style={{
                         background: cat.bg,
@@ -157,8 +176,12 @@ export function SkillsPreview() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
-                  whileHover={{ scale: 1.08, y: -3 }}
-                  className="glass border border-border/40 rounded-xl p-3 flex flex-col items-center gap-2 hover:border-primary/30 transition-all cursor-default group"
+                  whileHover={{
+                    scale: 1.1,
+                    y: -4,
+                    boxShadow: "0 8px 24px hsl(252 87% 63% / 0.1)",
+                  }}
+                  className="glass border border-border/40 rounded-xl p-3 flex flex-col items-center gap-2 hover:border-primary/30 transition-all cursor-default group glow-card"
                 >
                   {TECH_ICONS[tech.name] ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -168,12 +191,13 @@ export function SkillsPreview() {
                       className="w-7 h-7 group-hover:scale-110 transition-transform"
                     />
                   ) : (
-                    <div
+                    <motion.div
                       className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white"
                       style={{ background: tech.color }}
+                      whileHover={{ rotate: 10 }}
                     >
                       {tech.name.slice(0, 2)}
-                    </div>
+                    </motion.div>
                   )}
                   <span className="text-[10px] text-muted-foreground text-center leading-tight group-hover:text-foreground transition-colors">
                     {tech.name.replace(".js", "")}
@@ -188,9 +212,13 @@ export function SkillsPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
-              className="mt-5 p-4 rounded-xl glass border border-primary/20 flex items-start gap-3"
+              className="mt-5 p-4 rounded-xl glass border border-primary/20 flex items-start gap-3 glow-card"
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0 shadow-[0_0_6px_hsl(252_87%_63%)]" />
+              <motion.div
+                className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0 shadow-[0_0_6px_hsl(252_87%_63%)]"
+                animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
               <div>
                 <p className="text-xs font-mono uppercase tracking-widest text-primary font-semibold mb-0.5">
                   Current Focus

@@ -19,6 +19,50 @@ import { personal, stats } from "@/data/resume";
 import { TypeAnimation } from "react-type-animation";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
+import { AuroraBackground } from "@/components/ui/AuroraBackground";
+import { MagneticButton } from "@/components/ui/MagneticButton";
+import { TextReveal } from "@/components/ui/TextReveal";
+
+/* ─── Floating Orb ────────────────────────────────────── */
+function FloatingOrb({
+  size,
+  color,
+  top,
+  left,
+  delay = 0,
+}: {
+  size: number;
+  color: string;
+  top: string;
+  left: string;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      className="absolute rounded-full pointer-events-none"
+      style={{
+        width: size,
+        height: size,
+        top,
+        left,
+        background: color,
+        filter: "blur(1px)",
+      }}
+      animate={{
+        y: [0, -15, 0, 10, 0],
+        x: [0, 8, 0, -8, 0],
+        scale: [1, 1.15, 1, 0.9, 1],
+        opacity: [0.4, 0.7, 0.4, 0.6, 0.4],
+      }}
+      transition={{
+        duration: 10 + delay * 2,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay,
+      }}
+    />
+  );
+}
 
 /* ─── Stat Card ───────────────────────────────────────── */
 function StatCard({ stat, index }: { stat: (typeof stats)[0]; index: number }) {
@@ -30,23 +74,18 @@ function StatCard({ stat, index }: { stat: (typeof stats)[0]; index: number }) {
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: 0.7 + index * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-2xl p-4 text-center"
+      whileHover={{ scale: 1.04, y: -2 }}
+      className="rounded-2xl p-4 text-center glow-card group"
       style={{
         background: "rgba(255,255,255,0.05)",
         border: "1px solid rgba(255,255,255,0.08)",
       }}
     >
       <div
-        className="text-2xl sm:text-3xl font-bold tabular-nums leading-none mb-1"
-        style={{
-          background: "linear-gradient(135deg,#a78bfa,#818cf8,#67e8f9)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}
+        className="text-2xl sm:text-3xl font-bold tabular-nums leading-none mb-1 gradient-text-animated"
       >
         {inView ? (
           <CountUp
@@ -59,7 +98,7 @@ function StatCard({ stat, index }: { stat: (typeof stats)[0]; index: number }) {
           <span>{stat.value}{stat.suffix}</span>
         )}
       </div>
-      <div className="text-[11px] text-white/45 leading-tight">{stat.label}</div>
+      <div className="text-[11px] text-white/45 leading-tight group-hover:text-white/60 transition-colors">{stat.label}</div>
     </motion.div>
   );
 }
@@ -77,9 +116,18 @@ export function Hero() {
       ref={heroRef}
       className="relative min-h-screen flex items-center overflow-hidden bg-[#05030f]"
     >
+      {/* ── Aurora Animated Background ───────────────── */}
+      <AuroraBackground />
+
+      {/* ── Floating Orbs ────────────────────────────── */}
+      <FloatingOrb size={6} color="hsl(252 87% 63% / 0.6)" top="15%" left="8%" delay={0} />
+      <FloatingOrb size={4} color="hsl(199 89% 52% / 0.5)" top="25%" left="45%" delay={1.5} />
+      <FloatingOrb size={8} color="hsl(271 91% 65% / 0.4)" top="60%" left="12%" delay={3} />
+      <FloatingOrb size={5} color="hsl(168 74% 43% / 0.5)" top="75%" left="38%" delay={2} />
+      <FloatingOrb size={3} color="hsl(252 87% 63% / 0.6)" top="40%" left="42%" delay={4} />
+      <FloatingOrb size={7} color="hsl(199 89% 52% / 0.3)" top="85%" left="20%" delay={1} />
 
       {/* ── Right-side portrait ─────────────────────── */}
-      {/* Container: right 50% on lg, full width (behind overlay) on mobile */}
       <motion.div
         style={{ y: imgY }}
         className="absolute inset-y-0 right-0 w-full lg:w-[52%] pointer-events-none"
@@ -105,8 +153,16 @@ export function Hero() {
       </motion.div>
 
       {/* Accent glow behind image */}
-      <div className="absolute right-[15%] top-1/3 w-72 h-72 rounded-full bg-violet-600/10 blur-[100px] pointer-events-none" />
-      <div className="absolute right-[25%] bottom-1/4 w-48 h-48 rounded-full bg-cyan-500/8 blur-[80px] pointer-events-none" />
+      <motion.div
+        className="absolute right-[15%] top-1/3 w-72 h-72 rounded-full bg-violet-600/10 blur-[100px] pointer-events-none"
+        animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.2, 0.1] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute right-[25%] bottom-1/4 w-48 h-48 rounded-full bg-cyan-500/8 blur-[80px] pointer-events-none"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.08, 0.15, 0.08] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+      />
 
       {/* ── Content — left half ──────────────────────── */}
       <motion.div
@@ -117,9 +173,9 @@ export function Hero() {
 
           {/* Availability badge */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.1 }}
+            initial={{ opacity: 0, y: 16, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.55, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-sm text-white/60 mb-7"
             style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
           >
@@ -134,26 +190,29 @@ export function Hero() {
             <span>Tamil Nadu, India</span>
           </motion.div>
 
-          {/* Name */}
-          <motion.h1
+          {/* Name — with text reveal animation */}
+          <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="font-bold tracking-tight leading-[1.05] mb-5"
-            style={{ fontSize: "clamp(2.8rem, 5.5vw, 5rem)" }}
           >
-            <span className="text-white">{personal.name.split(" ")[0]}</span>{" "}
-            <span
-              style={{
-                background: "linear-gradient(135deg,#a78bfa 0%,#818cf8 50%,#67e8f9 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
+            <TextReveal
+              as="h1"
+              style="clip-reveal"
+              stagger={0.06}
+              className="font-bold tracking-tight leading-[1.05] mb-5"
             >
-              {personal.name.split(" ").slice(1).join(" ")}
-            </span>
-          </motion.h1>
+              <span className="text-white" style={{ fontSize: "clamp(2.8rem, 5.5vw, 5rem)" }}>
+                {personal.name.split(" ")[0]}
+              </span>{" "}
+              <span
+                className="gradient-text-animated"
+                style={{ fontSize: "clamp(2.8rem, 5.5vw, 5rem)" }}
+              >
+                {personal.name.split(" ").slice(1).join(" ")}
+              </span>
+            </TextReveal>
+          </motion.div>
 
           {/* Animated role */}
           <motion.div
@@ -195,36 +254,40 @@ export function Hero() {
             {personal.tagline}
           </motion.p>
 
-          {/* CTAs */}
+          {/* CTAs — with magnetic effect */}
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.5 }}
             className="flex flex-wrap items-center gap-3 mb-6"
           >
-            <Link
-              href="/projects"
-              className="group relative inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm text-white overflow-hidden hover:-translate-y-0.5 active:translate-y-0 transition-transform"
-              style={{
-                background: "linear-gradient(135deg,hsl(252 87% 63%),hsl(271 91% 65%))",
-                boxShadow: "0 8px 30px rgba(139,92,246,0.4)",
-              }}
-            >
-              <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-              View Projects
-              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+            <MagneticButton strength={0.3}>
+              <Link
+                href="/projects"
+                className="group relative inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm text-white overflow-hidden hover:-translate-y-0.5 active:translate-y-0 transition-transform"
+                style={{
+                  background: "linear-gradient(135deg,hsl(252 87% 63%),hsl(271 91% 65%))",
+                  boxShadow: "0 8px 30px rgba(139,92,246,0.4)",
+                }}
+              >
+                <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+                View Projects
+                <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </MagneticButton>
 
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm text-white/80 hover:text-white hover:-translate-y-0.5 active:translate-y-0 transition-all"
-              style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.13)",
-              }}
-            >
-              Get in Touch
-            </Link>
+            <MagneticButton strength={0.25}>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm text-white/80 hover:text-white hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.13)",
+                }}
+              >
+                Get in Touch
+              </Link>
+            </MagneticButton>
 
             <a
               href="/resume"
@@ -246,21 +309,22 @@ export function Hero() {
               { href: personal.github,   icon: Github,   label: "GitHub"   },
               { href: personal.linkedin, icon: Linkedin, label: "LinkedIn" },
             ].map(({ href, icon: Icon, label }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white/45 hover:text-white transition-all"
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                }}
-              >
-                <Icon size={14} />
-                {label}
-                <ExternalLink size={11} className="opacity-0 group-hover:opacity-40 transition-opacity" />
-              </a>
+              <MagneticButton key={label} strength={0.2}>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white/45 hover:text-white transition-all glow-card"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <Icon size={14} />
+                  {label}
+                  <ExternalLink size={11} className="opacity-0 group-hover:opacity-40 transition-opacity" />
+                </a>
+              </MagneticButton>
             ))}
           </motion.div>
 
@@ -278,7 +342,7 @@ export function Hero() {
         </div>
       </motion.div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator — enhanced with glow */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -286,7 +350,7 @@ export function Hero() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
       >
         <div
-          className="w-5 h-8 rounded-full flex items-start justify-center p-1.5"
+          className="w-5 h-8 rounded-full flex items-start justify-center p-1.5 pulse-glow"
           style={{ border: "1px solid rgba(255,255,255,0.15)" }}
         >
           <motion.div

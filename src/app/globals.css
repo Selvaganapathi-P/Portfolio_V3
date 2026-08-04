@@ -205,6 +205,211 @@ body::after {
   animation-play-state: paused;
 }
 
+/* ════════════════════════════════════════════════════════
+   GOD MODE — ANIMATION UTILITIES
+   ════════════════════════════════════════════════════════ */
+
+/* ─── Aurora Blob Base ───────────────────────────────── */
+.aurora-blob {
+  border-radius: 50%;
+  filter: blur(80px);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+@keyframes aurora-drift-1 {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33%  { transform: translate(8%, 5%) scale(1.08) rotate(4deg); }
+  66%  { transform: translate(-5%, 10%) scale(0.95) rotate(-3deg); }
+  100% { transform: translate(3%, -4%) scale(1.03) rotate(2deg); }
+}
+
+@keyframes aurora-drift-2 {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33%  { transform: translate(-10%, 6%) scale(1.1) rotate(-5deg); }
+  66%  { transform: translate(6%, -8%) scale(0.92) rotate(3deg); }
+  100% { transform: translate(-3%, 4%) scale(1.06) rotate(-2deg); }
+}
+
+@keyframes aurora-drift-3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(7%, -6%) scale(1.12); }
+  100% { transform: translate(-5%, 8%) scale(0.94); }
+}
+
+@keyframes aurora-drift-4 {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%  { transform: translate(9%, 3%) scale(1.05) rotate(6deg); }
+  100% { transform: translate(-6%, -5%) scale(0.97) rotate(-4deg); }
+}
+
+@keyframes aurora-drift-5 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-8%, 7%) scale(1.08); }
+  100% { transform: translate(5%, -3%) scale(0.96); }
+}
+
+/* ─── Animated Gradient Border ───────────────────────── */
+.animated-border {
+  position: relative;
+  z-index: 0;
+}
+
+.animated-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--border-angle, 0deg),
+    transparent 20%,
+    hsl(252 87% 63% / 0.6) 40%,
+    hsl(271 91% 65% / 0.7) 50%,
+    hsl(199 89% 52% / 0.6) 60%,
+    transparent 80%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rotate-border 4s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes rotate-border {
+  to { --border-angle: 360deg; }
+}
+
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ─── Glow Card ──────────────────────────────────────── */
+.glow-card {
+  position: relative;
+  transition: box-shadow 0.4s ease;
+}
+
+.glow-card:hover {
+  box-shadow:
+    0 0 30px -5px hsl(252 87% 63% / 0.15),
+    0 0 60px -10px hsl(271 91% 65% / 0.1);
+}
+
+/* ─── Shimmer Text ───────────────────────────────────── */
+.shimmer-text {
+  background: linear-gradient(
+    110deg,
+    hsl(var(--foreground)) 35%,
+    hsl(252 87% 63%) 50%,
+    hsl(var(--foreground)) 65%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-sweep 3s ease-in-out infinite;
+}
+
+@keyframes shimmer-sweep {
+  0%, 100% { background-position: 100% center; }
+  50%      { background-position: 0% center; }
+}
+
+/* ─── Animated Gradient Text ─────────────────────────── */
+.gradient-text-animated {
+  background: linear-gradient(
+    135deg,
+    hsl(252 87% 63%),
+    hsl(271 91% 65%),
+    hsl(199 89% 52%),
+    hsl(168 74% 43%),
+    hsl(252 87% 63%)
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 6s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Blur-In Utility ────────────────────────────────── */
+.blur-in {
+  animation: blur-in-anim 0.6s ease-out both;
+}
+
+@keyframes blur-in-anim {
+  0%   { opacity: 0; filter: blur(12px); transform: translateY(8px); }
+  100% { opacity: 1; filter: blur(0px);  transform: translateY(0); }
+}
+
+/* ─── Floating Animation (enhanced) ──────────────────── */
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%      { transform: translateY(-6px) rotate(1deg); }
+  50%      { transform: translateY(-12px) rotate(0deg); }
+  75%      { transform: translateY(-6px) rotate(-1deg); }
+}
+
+.float-gentle {
+  animation: float-gentle 8s ease-in-out infinite;
+}
+
+/* ─── Pulse Glow ─────────────────────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px hsl(252 87% 63% / 0.3); }
+  50%      { box-shadow: 0 0 24px hsl(252 87% 63% / 0.5), 0 0 48px hsl(271 91% 65% / 0.2); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ─── Gradient Underline on Hover ────────────────────── */
+.gradient-underline {
+  position: relative;
+}
+
+.gradient-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, hsl(252 87% 63%), hsl(271 91% 65%), hsl(199 89% 52%));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 1px;
+}
+
+.gradient-underline:hover::after {
+  transform: scaleX(1);
+}
+
+/* ─── Cursor Trail Dot ───────────────────────────────── */
+@keyframes trail-fade {
+  0%   { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0;   transform: translate(-50%, -50%) scale(0.2); }
+}
+
+/* ─── Click Ripple ───────────────────────────────────── */
+@keyframes click-ripple {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(3);  opacity: 0; }
+}
+
 /* ─── Reduce Motion ──────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -212,4 +417,5 @@ body::after {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  .aurora-blob { display: none; }
 }

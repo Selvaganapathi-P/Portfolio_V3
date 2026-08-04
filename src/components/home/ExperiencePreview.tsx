@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Briefcase, MapPin, Calendar } from "lucide-react";
 import { experience } from "@/data/resume";
+import { TextReveal } from "@/components/ui/TextReveal";
 
 function TimelineItem({ exp, index, isLast }: { exp: typeof experience[0]; index: number; isLast: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -37,6 +38,7 @@ function TimelineItem({ exp, index, isLast }: { exp: typeof experience[0]; index
         initial={{ scale: 0.6, opacity: 0 }}
         animate={inView ? { scale: 1, opacity: 1 } : {}}
         transition={{ duration: 0.5, delay: index * 0.12 + 0.1, ease: [0.16, 1, 0.3, 1] }}
+        whileHover={{ scale: 1.1, rotate: 5 }}
       >
         <Briefcase size={16} className="text-primary" />
         {inView && (
@@ -47,14 +49,22 @@ function TimelineItem({ exp, index, isLast }: { exp: typeof experience[0]; index
             transition={{ duration: 0.8, delay: index * 0.12 + 0.2 }}
           />
         )}
+        {/* Secondary ripple */}
+        {inView && (
+          <motion.div
+            className="absolute inset-0 rounded-xl border border-primary/20"
+            initial={{ scale: 1, opacity: 0.5 }}
+            animate={{ scale: 2.2, opacity: 0 }}
+            transition={{ duration: 1.1, delay: index * 0.12 + 0.35 }}
+          />
+        )}
       </motion.div>
 
       {/* Content */}
       <div className="flex-1 pb-12">
         <motion.div
-          className="glass border border-border/40 rounded-2xl p-6 hover:border-primary/30 transition-colors duration-300"
-          whileHover={{ y: -2 }}
-          transition={{ duration: 0.2 }}
+          className="glass border border-border/40 rounded-2xl p-6 hover:border-primary/30 transition-all duration-300 glow-card"
+          whileHover={{ y: -3, transition: { duration: 0.25 } }}
         >
           <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
             <div>
@@ -62,9 +72,12 @@ function TimelineItem({ exp, index, isLast }: { exp: typeof experience[0]; index
               <p className="text-primary font-semibold mt-0.5">{exp.company}</p>
             </div>
             <div className="flex flex-col items-end gap-1.5">
-              <span className="px-2.5 py-1 text-xs rounded-full bg-primary/10 text-primary border border-primary/20 font-medium">
+              <motion.span
+                className="px-2.5 py-1 text-xs rounded-full bg-primary/10 text-primary border border-primary/20 font-medium"
+                whileHover={{ scale: 1.05 }}
+              >
                 {exp.type}
-              </span>
+              </motion.span>
               <div className="flex items-center gap-1 text-xs text-muted-foreground font-mono">
                 <Calendar size={11} />
                 {exp.startDate} – {exp.endDate}
@@ -86,7 +99,14 @@ function TimelineItem({ exp, index, isLast }: { exp: typeof experience[0]; index
                 transition={{ delay: index * 0.12 + 0.4 + j * 0.07 }}
                 className="flex gap-2 text-sm text-muted-foreground"
               >
-                <span className="text-primary mt-1.5 flex-shrink-0 text-xs">▸</span>
+                <motion.span
+                  className="text-primary mt-1.5 flex-shrink-0 text-xs"
+                  initial={{ scale: 0 }}
+                  animate={inView ? { scale: 1 } : {}}
+                  transition={{ delay: index * 0.12 + 0.45 + j * 0.07, type: "spring", bounce: 0.5 }}
+                >
+                  ▸
+                </motion.span>
                 {r}
               </motion.li>
             ))}
@@ -99,7 +119,8 @@ function TimelineItem({ exp, index, isLast }: { exp: typeof experience[0]; index
                 initial={{ opacity: 0, scale: 0.85 }}
                 animate={inView ? { opacity: 1, scale: 1 } : {}}
                 transition={{ delay: index * 0.12 + 0.5 + k * 0.04 }}
-                className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono"
+                whileHover={{ scale: 1.08, y: -1 }}
+                className="px-2 py-0.5 text-xs rounded-md bg-secondary text-muted-foreground border border-border/50 font-mono hover:border-primary/30 hover:text-primary/80 transition-colors cursor-default"
               >
                 {tech}
               </motion.span>
@@ -124,16 +145,28 @@ export function ExperiencePreview() {
         >
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-px bg-primary" />
+              <motion.div
+                className="w-6 h-px bg-primary"
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                style={{ transformOrigin: "left" }}
+              />
               <span className="text-xs text-primary font-mono uppercase tracking-widest">Career</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Work <span className="gradient-text">Experience</span>
-            </h2>
+            <TextReveal
+              as="h2"
+              style="blur-in"
+              stagger={0.06}
+              className="text-3xl sm:text-4xl font-bold tracking-tight"
+            >
+              Work Experience
+            </TextReveal>
           </div>
           <Link
             href="/experience"
-            className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+            className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group gradient-underline"
           >
             Full timeline
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
